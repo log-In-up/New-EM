@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 71b88a382550c644bb7e5e9215033be3
+  m_SerializeEntries:
+  - m_GUID: 34cec1921af98c248ba58ef3d059e0e8
+    m_Address: Enemy Spawner
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 495b9c9b1c46d4b459b17582f6630e03
+    m_Address: HUD
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6a96a4ebafd83f4aaff4de4c9bb81d7
+    m_Address: Player
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7a22d775744dfb479eeab5654414b07
+    m_Address: Enemy Static Data
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - EnemyStaticData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 48031b9007686464e9bb648317bafbf5
+    m_Address: Main Static Data
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - LevelStaticData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef718fa0d6244d04b8b28f6fbf7d2200
+    m_Address: Dungeon Static Data
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - LevelStaticData
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: ed53ae4aacd5b664db6354b75f35b575, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: e251099b18734f84d9fcbb5a674ea592, type: 2}
+    - {fileID: 11400000, guid: 680662e387de8d7459e04a7f2e74c70d, type: 2}

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01422b4a3a9ad154da5c4428f240601e, type: 3}
+  m_Name: Dungeon Static Data
+  m_EditorClassIdentifier: 
+  _enemySpawnData:
+  - Id: Dungeon-92e0d292-31f9-4427-808a-494046c05199
+    Type: 0
+    Position: {x: -10, y: 0, z: 10}
+    Rotation: {x: 0, y: 0.9238795, z: 0, w: 0.38268343}
+  - Id: Dungeon-94daac9d-db51-4701-a2ae-ca4b1f1ba8df
+    Type: 0
+    Position: {x: -10, y: 0, z: -10}
+    Rotation: {x: 0, y: 0.38268346, z: 0, w: 0.9238795}
+  - Id: Dungeon-77bfa6d6-d4eb-49bf-b72a-e7e2c766c676
+    Type: 0
+    Position: {x: 10, y: 0, z: -10}
+    Rotation: {x: 0, y: 0.3826835, z: 0, w: -0.9238795}
+  - Id: Dungeon-01d2f99a-9ac7-4575-943a-d8c9f18f92c2
+    Type: 0
+    Position: {x: 10, y: 0, z: 10}
+    Rotation: {x: 0, y: 0.92387956, z: 0, w: -0.3826834}
+  _initialPlayerPosition: {x: 0, y: 0, z: 0}
+  _initialPlayerRotation: {x: -0, y: 0.33641845, z: -0, w: 0.9417126}
+  _levelName: Dungeon
+  _playerSpawnPointTag: PlayerStartingPoint
