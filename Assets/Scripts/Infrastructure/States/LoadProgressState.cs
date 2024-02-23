@@ -1,6 +1,6 @@
-﻿using Assets.Scripts.Data;
-using Assets.Scripts.Infrastructure.Services.PersistentProgress;
+﻿using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
+using Assets.Scripts.UserInterface;
 
 namespace Assets.Scripts.Infrastructure.States
 {
@@ -8,39 +8,35 @@ namespace Assets.Scripts.Infrastructure.States
     {
         private readonly IPersistentProgressService _progressService;
         private readonly ISaveLoadService _saveLoadService;
+        private readonly IGameUI _gameUI;
         private readonly GameStateMachine _stateMachine;
 
-        public LoadProgressState(GameStateMachine stateMachine, IPersistentProgressService progressService, ISaveLoadService saveLoadService)
+        public LoadProgressState(GameStateMachine stateMachine,
+            IPersistentProgressService progressService,
+            ISaveLoadService saveLoadService,
+            IGameUI gameUI)
         {
             _stateMachine = stateMachine;
             _progressService = progressService;
             _saveLoadService = saveLoadService;
+            _gameUI = gameUI;
         }
 
         public void Enter()
         {
-            LoadProgressOrInitNew();
+            LoadProgress();
 
-            _stateMachine.Enter<LoadLevelState, string>(_progressService.GameData.CurrentLevel);
+            _gameUI.OpenScreen(WindowID.Main);
+            _stateMachine.Enter<PreGameLoopState>();
         }
 
         public void Exit()
         {
         }
 
-        private void LoadProgressOrInitNew()
+        private void LoadProgress()
         {
             _progressService.DataProfiles = _saveLoadService.LoadAllProfiles();
-
-            if (_progressService.DataProfiles.Count <= 0)
-            {
-                _progressService.GameData = new GameData();
-                _saveLoadService.Save("New Game");
-            }
-            else
-            {
-                _progressService.GameData = _saveLoadService.Load("New Game");
-            }
         }
     }
 }

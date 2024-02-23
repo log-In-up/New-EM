@@ -54,13 +54,6 @@ namespace Assets.Scripts.Infrastructure.Factory
             return enemy;
         }
 
-        public async Task<GameObject> CreateHUD()
-        {
-            GameObject prefab = await _assetProvider.Load<GameObject>(AssetsAddress.HUD);
-
-            return InstantiateRegistered(prefab);
-        }
-
         public async Task<GameObject> CreatePlayer(Vector3 position, Quaternion rotation)
         {
             GameObject prefab = await _assetProvider.Load<GameObject>(AssetsAddress.Player);
@@ -83,7 +76,6 @@ namespace Assets.Scripts.Infrastructure.Factory
         public async Task WarmUp()
         {
             await _assetProvider.Load<GameObject>(AssetsAddress.Spawner);
-            await _assetProvider.Load<GameObject>(AssetsAddress.HUD);
             await _assetProvider.Load<GameObject>(AssetsAddress.Player);
         }
 

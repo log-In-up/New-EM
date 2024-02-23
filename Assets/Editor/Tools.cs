@@ -10,9 +10,7 @@ namespace Assets.Editor
         [MenuItem("Tools/Clear Save Data")]
         public static void ClearSaveData()
         {
-            string fullPath = Path.Combine(Application.persistentDataPath, Application.productName);
-            Debug.Log(fullPath);
-            Debug.Log(Application.persistentDataPath);
+            string fullPath = Path.Combine(Application.persistentDataPath);
 
             if (Directory.Exists(fullPath))
             {
@@ -26,7 +24,7 @@ namespace Assets.Editor
                 }
                 catch (Exception exeption)
                 {
-                    Debug.LogError($"Error occured when trying to delete data from path: {fullPath} \n{exeption}");
+                    Debug.LogError($"Error occured when trying to delete data from path: {fullPath}.\n{exeption}");
                 }
             }
             else

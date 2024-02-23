@@ -16,8 +16,6 @@ namespace Assets.Scripts.Infrastructure.Factory
 
         Task<GameObject> CreateEnemy(EnemyTypeId enemyTypeId, Transform parent);
 
-        Task<GameObject> CreateHUD();
-
         Task<GameObject> CreatePlayer(Vector3 position, Quaternion rotation);
 
         Task CreateSpawner(EnemySpawnData spawnData);

@@ -6,6 +6,7 @@ namespace Assets.Scripts.Data
     public class GameData
     {
         public string CurrentLevel;
+        public SaveInfo SaveInfo;
 
         public GameData()
         {

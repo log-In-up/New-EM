@@ -39,6 +39,71 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             _ecriptionCodeWord = ecriptionCodeWord;
         }
 
+        public void CreateNewGame()
+        {
+            _persistentProgressService.GameData = new GameData();
+            Save("New Game");
+        }
+
+        public void Delete(string profileId)
+        {
+            if (string.IsNullOrEmpty(profileId)) return;
+
+            string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
+            try
+            {
+                if (File.Exists(fullPath))
+                {
+                    Directory.Delete(Path.GetDirectoryName(fullPath), true);
+                }
+                else
+                {
+                    Debug.LogWarning($"Tried to delete profile data, but data was not found at path: {fullPath}");
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"Failed to delete profile data for profileId: {profileId} at path: {fullPath}.\n{exception}");
+            }
+        }
+
+        public string GetMostRecentlyUpdatedProfileId()
+        {
+            string mostRecentProfileId = null;
+
+            Dictionary<string, GameData> profilesGameData = LoadAllProfiles();
+
+            foreach (KeyValuePair<string, GameData> pair in profilesGameData)
+            {
+                string profileId = pair.Key;
+                GameData gameData = pair.Value;
+
+                if (gameData == null) continue;
+
+                if (mostRecentProfileId == null)
+                {
+                    mostRecentProfileId = profileId;
+                }
+                else
+                {
+                    long dateData = profilesGameData[mostRecentProfileId].SaveInfo.LastUpdated;
+                    DateTime mostRecentDateTime = DateTime.FromBinary(dateData);
+                    DateTime newDateTime = DateTime.FromBinary(gameData.SaveInfo.LastUpdated);
+
+                    if (newDateTime > mostRecentDateTime)
+                    {
+                        mostRecentProfileId = profileId;
+                    }
+                }
+            }
+            return mostRecentProfileId;
+        }
+
+        public string GetPath(string profileId)
+        {
+            return Path.GetDirectoryName(Path.Combine(_dataDirPath, profileId, _dataFileName));
+        }
+
         public GameData Load(string profileId)
         {
             string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
@@ -66,7 +131,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogError("Error occured when trying to load data from file: " + fullPath + "\n" + exception);
+                    Debug.LogError($"Error occured when trying to load data from file: {fullPath}.\n{exception}");
                 }
             }
 
@@ -85,7 +150,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
                 if (!File.Exists(fullPath))
                 {
-                    Debug.LogWarning($"Skipping directory when loading all profiles because it does not contain data: {profileId}");
+                    Debug.LogWarning($"Skipping directory when loading all profiles because it does not contain data: {profileId}.");
                     continue;
                 }
 
@@ -97,11 +162,17 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 }
                 else
                 {
-                    Debug.LogError($"Tried to load profile but something went wrong. ProfileID: {profileId}");
+                    Debug.LogError($"Tried to load profile but something went wrong. ProfileID: {profileId}.");
                 }
             }
 
             return profileDictionary;
+        }
+
+        public void LoadRecentlyUpdatedSave()
+        {
+            string profileId = GetMostRecentlyUpdatedProfileId();
+            _persistentProgressService.GameData = Load(profileId);
         }
 
         public void Save(string profileId)
@@ -113,6 +184,9 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+
+                SaveInfo saveInfo = new SaveInfo(DateTime.Now.Ticks, profileId);
+                _persistentProgressService.GameData.SaveInfo = saveInfo;
 
                 string dataToStore = JsonUtility.ToJson(_persistentProgressService.GameData, true);
 
@@ -131,7 +205,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             }
             catch (Exception exception)
             {
-                Debug.LogError("Error occured when trying to save data to file: " + fullPath + "\n" + exception);
+                Debug.LogError($"Error occured when trying to save data to file: {fullPath}.\n{exception}");
             }
         }
 
