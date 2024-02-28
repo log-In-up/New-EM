@@ -7,18 +7,18 @@ namespace Assets.Scripts.StaticData
 {
     public class StaticDataService : IStaticDataService
     {
-        private const string ENEMY_STATIC_DATA_LABEL = "EnemyStaticData";
-        private const string LEVEL_STATIC_DATA_LABEL = "LevelStaticData";
-
         private readonly IAssetProvider _assetProvider;
+        private readonly GameStaticData _gameStaticData;
         private Dictionary<EnemyTypeId, EnemyStaticData> _enemiesСache;
         private Dictionary<string, LevelStaticData> _levelsCache;
 
-        public StaticDataService(IAssetProvider assetProvider)
+        public StaticDataService(IAssetProvider assetProvider, GameStaticData gameStaticData)
         {
+            _assetProvider = assetProvider;
+            _gameStaticData = gameStaticData;
+
             _enemiesСache = new Dictionary<EnemyTypeId, EnemyStaticData>();
             _levelsCache = new Dictionary<string, LevelStaticData>();
-            _assetProvider = assetProvider;
         }
 
         ~StaticDataService()
@@ -48,7 +48,7 @@ namespace Assets.Scripts.StaticData
 
         public async Task LoadDataAsync()
         {
-            IList<IResourceLocation> locations = await _assetProvider.LoadByLabel(ENEMY_STATIC_DATA_LABEL, typeof(EnemyStaticData));
+            IList<IResourceLocation> locations = await _assetProvider.LoadByLabel(_gameStaticData.EnemyStaticDataLabel, typeof(EnemyStaticData));
 
             foreach (IResourceLocation location in locations)
             {
@@ -56,7 +56,7 @@ namespace Assets.Scripts.StaticData
                 _enemiesСache.Add(handle.EnemyTypeId, handle);
             }
 
-            locations = await _assetProvider.LoadByLabel(LEVEL_STATIC_DATA_LABEL, typeof(LevelStaticData));
+            locations = await _assetProvider.LoadByLabel(_gameStaticData.LevelStaticDataLabel, typeof(LevelStaticData));
 
             foreach (IResourceLocation location in locations)
             {

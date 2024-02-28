@@ -15,7 +15,6 @@ namespace Assets.Scripts.Infrastructure.States
 
         public void Exit()
         {
-            //_stateMachine.Enter<LoadLevelState, string>(_progressService.GameData.CurrentLevel);
         }
     }
 }

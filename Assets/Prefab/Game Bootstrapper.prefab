@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hud: {fileID: 5828844498959420161, guid: 495b9c9b1c46d4b459b17582f6630e03, type: 3}
+  _gameStaticData: {fileID: 11400000, guid: 0e32d3a39d7f80d469db62e7a2902c17, type: 2}

@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.Infrastructure.AssetManagement;
 using Assets.Scripts.Infrastructure.Factory;
+using Assets.Scripts.Infrastructure.Services.Input;
+using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.States;
@@ -11,20 +13,28 @@ namespace Assets.Scripts.Infrastructure.Services
 {
     public class ServiceInitializer
     {
-        private const string SaveFileName = "Save.txt";
-        private const string ENCRYPTION_CODE_WORD = "EMEncrypt";
         private readonly GameStateMachine _stateMachine;
         private readonly ServiceLocator _serviceLocator;
+        private readonly GameStaticData _gameStaticData;
+        private readonly ISceneLoader _sceneLoader;
 
-        public ServiceInitializer(GameStateMachine stateMachine, ServiceLocator serviceLocator)
+        public ServiceInitializer(GameStateMachine stateMachine,
+            ServiceLocator serviceLocator,
+            GameStaticData gameStaticData,
+            ISceneLoader sceneLoader)
         {
             _stateMachine = stateMachine;
             _serviceLocator = serviceLocator;
+            _gameStaticData = gameStaticData;
+            _sceneLoader = sceneLoader;
         }
 
         public async Task RegisterServicesAsync()
         {
             _serviceLocator.RegisterService<IGameStateMachine>(_stateMachine);
+            _serviceLocator.RegisterService<IInputService>(new InputService());
+            _serviceLocator.RegisterService<IPauseContinueService>(new PauseContinueService());
+            _serviceLocator.RegisterService(_sceneLoader);
 
             RegisterAssetProvider();
             await RegisterStaticDataAsync();
@@ -35,12 +45,19 @@ namespace Assets.Scripts.Infrastructure.Services
 
             _serviceLocator.RegisterService<IPersistentProgressService>(new PersistentProgressService());
 
-            _serviceLocator.RegisterService<ISaveLoadService>(new SaveLoadService(
-                _serviceLocator.GetService<IGameFactory>(),
-                _serviceLocator.GetService<IPersistentProgressService>(),
-                Application.persistentDataPath,
-                SaveFileName,
-                ENCRYPTION_CODE_WORD));
+            RegisterSaveLoadService();
+        }
+
+        private void RegisterSaveLoadService()
+        {
+            SaveLoadService saveLoadService = new SaveLoadService(
+                    _serviceLocator.GetService<IGameFactory>(),
+                    _serviceLocator.GetService<IPersistentProgressService>(),
+                    Application.persistentDataPath,
+                    _gameStaticData.SaveFileName,
+                    _gameStaticData.EncryptionCodeWord);
+
+            _serviceLocator.RegisterService<ISaveLoadService>(saveLoadService);
         }
 
         private void RegisterAssetProvider()
@@ -53,7 +70,9 @@ namespace Assets.Scripts.Infrastructure.Services
 
         private async Task RegisterStaticDataAsync()
         {
-            IStaticDataService staticDataService = new StaticDataService(_serviceLocator.GetService<IAssetProvider>());
+            IStaticDataService staticDataService = new StaticDataService(
+                _serviceLocator.GetService<IAssetProvider>(),
+                _gameStaticData);
 
             _serviceLocator.RegisterService(staticDataService);
             await staticDataService.LoadDataAsync();

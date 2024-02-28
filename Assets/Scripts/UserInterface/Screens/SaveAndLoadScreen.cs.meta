@@ -3,7 +3,13 @@ guid: 3b7a6157d516cc945bc45d12664f26e0
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - _close: {instanceID: 0}
+  - _deleteSave: {instanceID: 0}
+  - _loadSave: {instanceID: 0}
+  - _saveSlotExample: {fileID: 2331281850699218892, guid: 7d0123cbb84a99c4bbdbaf4a22037da4,
+      type: 3}
+  - _viewportParent: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

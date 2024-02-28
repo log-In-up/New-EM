@@ -15,7 +15,11 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         private readonly IPersistentProgressService _persistentProgressService;
         private readonly bool _useIncription;
 
-        public SaveLoadService(IGameFactory gameFactory, IPersistentProgressService persistentProgressService, string dataDirPath, string dataFileName)
+        public SaveLoadService(IGameFactory gameFactory,
+            IPersistentProgressService persistentProgressService,
+            string dataDirPath,
+            string dataFileName,
+            string ecriptionCodeWord)
         {
             _gameFactory = gameFactory;
             _persistentProgressService = persistentProgressService;
@@ -23,19 +27,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             _dataDirPath = dataDirPath;
             _dataFileName = dataFileName;
 
-            _useIncription = false;
-            _ecriptionCodeWord = "";
-        }
-
-        public SaveLoadService(IGameFactory gameFactory, IPersistentProgressService persistentProgressService, string dataDirPath, string dataFileName, string ecriptionCodeWord)
-        {
-            _gameFactory = gameFactory;
-            _persistentProgressService = persistentProgressService;
-
-            _dataDirPath = dataDirPath;
-            _dataFileName = dataFileName;
-
-            _useIncription = true;
+            _useIncription = !string.IsNullOrEmpty(ecriptionCodeWord);
             _ecriptionCodeWord = ecriptionCodeWord;
         }
 

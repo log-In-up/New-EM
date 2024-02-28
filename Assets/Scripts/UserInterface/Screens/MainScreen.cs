@@ -5,6 +5,10 @@ using Assets.Scripts.Infrastructure.States;
 using UnityEngine;
 using UnityEngine.UI;
 
+#if UNITY_ANDROID || UNITY_IOS
+using Assets.Scripts.Infrastructure.Services.Input;
+#endif
+
 namespace Assets.Scripts.UserInterface.Screens
 {
     public class MainScreen : Window
@@ -27,11 +31,17 @@ namespace Assets.Scripts.UserInterface.Screens
         private IPersistentProgressService _persistentProgressService;
         private ISaveLoadService _saveLoadService;
         private IGameStateMachine _stateMachine;
+#if UNITY_ANDROID || UNITY_IOS
+        private IInputService _inputService;
+#endif
 
         public override WindowID ID => WindowID.Main;
 
         public override void Activate()
         {
+            GameUI.ClearScreens();
+            GameUI.PushScreen(ID);
+
             if (_persistentProgressService.DataProfiles.Count <= 0)
             {
                 _continue.gameObject.SetActive(false);
@@ -49,6 +59,9 @@ namespace Assets.Scripts.UserInterface.Screens
 
             _load.onClick.AddListener(OnClickLoad);
             _quit.onClick.AddListener(OnClickQuit);
+#if UNITY_ANDROID || UNITY_IOS
+            _inputService.OnClickCancel += OnClickQuit;
+#endif
             _settings.onClick.AddListener(OnClickSettings);
 
             base.Activate();
@@ -69,6 +82,9 @@ namespace Assets.Scripts.UserInterface.Screens
 
             _load.onClick.RemoveListener(OnClickLoad);
             _quit.onClick.RemoveListener(OnClickQuit);
+#if UNITY_ANDROID || UNITY_IOS
+            _inputService.OnClickCancel -= OnClickQuit;
+#endif
             _settings.onClick.RemoveListener(OnClickSettings);
 
             _load.interactable = true;
@@ -76,15 +92,16 @@ namespace Assets.Scripts.UserInterface.Screens
             base.Deactivate();
         }
 
-        public override void Setup()
+        public override void Setup(ServiceLocator serviceLocator)
         {
-            base.Setup();
-
-            ServiceLocator serviceLocator = ServiceLocator.Container;
+            base.Setup(serviceLocator);
 
             _persistentProgressService = serviceLocator.GetService<IPersistentProgressService>();
             _saveLoadService = serviceLocator.GetService<ISaveLoadService>();
             _stateMachine = serviceLocator.GetService<IGameStateMachine>();
+#if UNITY_ANDROID || UNITY_IOS
+            _inputService = serviceLocator.GetService<IInputService>();
+#endif
         }
 
         private void OnClickContinue()
@@ -99,8 +116,14 @@ namespace Assets.Scripts.UserInterface.Screens
             GameUI.OpenScreen(WindowID.SafeAndLoad);
         }
 
-        private void OnClickQuit() =>
+        private void OnClickQuit()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
             Application.Quit();
+#endif
+        }
 
         private void OnClickSettings()
         {

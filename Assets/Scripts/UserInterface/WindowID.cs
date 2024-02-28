@@ -7,6 +7,7 @@
         SafeAndLoad = 2,
         Settings = 3,
         Title = 4,
-        Gameplay = 5
+        Gameplay = 5,
+        GamePauseScreen = 6
     }
 }

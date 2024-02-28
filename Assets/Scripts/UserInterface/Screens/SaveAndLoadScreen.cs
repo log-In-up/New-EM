@@ -1,5 +1,6 @@
 using Assets.Scripts.Data;
 using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.Input;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.States;
@@ -21,27 +22,25 @@ namespace Assets.Scripts.UserInterface.Screens
         [SerializeField]
         private Button _loadSave;
 
-        private IPersistentProgressService _persistentProgressService;
-
-        private ISaveLoadService _saveLoadService;
-
-        private string _saveName;
-
         [SerializeField]
         private SaveSlot _saveSlotExample;
 
-        private List<SaveSlot> _saveSlots;
-
-        private IGameStateMachine _stateMachine;
-
         [SerializeField]
         private RectTransform _viewportParent;
+
+        private IInputService _inputService;
+        private IPersistentProgressService _persistentProgressService;
+        private ISaveLoadService _saveLoadService;
+        private string _saveName;
+        private List<ISaveSlot> _saveSlots;
+        private IGameStateMachine _stateMachine;
 
         public override WindowID ID => WindowID.SafeAndLoad;
 
         public override void Activate()
         {
             _close.onClick.AddListener(OnClickClose);
+            _inputService.OnClickCancel += OnClickClose;
             _deleteSave.onClick.AddListener(OnClickDeleteSave);
             _loadSave.onClick.AddListener(OnClickLoadSave);
 
@@ -57,6 +56,7 @@ namespace Assets.Scripts.UserInterface.Screens
         public override void Deactivate()
         {
             _close.onClick.RemoveListener(OnClickClose);
+            _inputService.OnClickCancel -= OnClickClose;
             _deleteSave.onClick.RemoveListener(OnClickDeleteSave);
             _loadSave.onClick.RemoveListener(OnClickLoadSave);
 
@@ -65,14 +65,13 @@ namespace Assets.Scripts.UserInterface.Screens
             ClearSaveSlots();
         }
 
-        public override void Setup()
+        public override void Setup(ServiceLocator serviceLocator)
         {
-            _saveSlots = new List<SaveSlot>();
+            _saveSlots = new List<ISaveSlot>();
 
-            base.Setup();
+            base.Setup(serviceLocator);
 
-            ServiceLocator serviceLocator = ServiceLocator.Container;
-
+            _inputService = serviceLocator.GetService<IInputService>();
             _persistentProgressService = serviceLocator.GetService<IPersistentProgressService>();
             _saveLoadService = serviceLocator.GetService<ISaveLoadService>();
             _stateMachine = serviceLocator.GetService<IGameStateMachine>();
@@ -80,10 +79,10 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void ClearSaveSlots()
         {
-            foreach (SaveSlot item in _saveSlots)
+            foreach (ISaveSlot item in _saveSlots)
             {
                 item.OnSelectSlotName -= OnSelectSlotName;
-                Destroy(item.gameObject);
+                Destroy(item.GameObject);
             }
 
             _saveSlots.Clear();
@@ -93,13 +92,13 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             foreach (KeyValuePair<string, GameData> item in _persistentProgressService.DataProfiles)
             {
-                SaveSlot saveSlot = Instantiate(_saveSlotExample, _viewportParent);
+                ISaveSlot saveSlot = Instantiate(_saveSlotExample, _viewportParent);
                 saveSlot.SetSlotData(item.Value.SaveInfo);
 
                 _saveSlots.Add(saveSlot);
             }
 
-            foreach (SaveSlot item in _saveSlots)
+            foreach (ISaveSlot item in _saveSlots)
             {
                 item.OnSelectSlotName += OnSelectSlotName;
             }
@@ -107,7 +106,7 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void OnClickClose()
         {
-            GameUI.OpenScreen(WindowID.Main);
+            GameUI.OpenScreen(GameUI.PeekScreen());
         }
 
         private void OnClickDeleteSave()

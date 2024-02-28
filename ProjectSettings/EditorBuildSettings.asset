@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Initial/Initial.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
+    path: Assets/Scenes/GameScreensaver/GameScreensaver.unity
+    guid: e4852b5eb82bf9a459be84851d4e755c
+  - enabled: 1
     path: Assets/Scenes/Main/Main.unity
     guid: 1c1758efe1beabe439fc779066064752
   m_configObjects:

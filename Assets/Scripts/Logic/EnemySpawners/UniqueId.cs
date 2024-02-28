@@ -7,7 +7,9 @@ namespace Assets.Scripts.Logic
     {
         public string Id;
 
-        public void GenerateId() =>
-          Id = $"{gameObject.scene.name}-{Guid.NewGuid()}";
+        public void GenerateId()
+        {
+            Id = $"{gameObject.scene.name}-{Guid.NewGuid()}";
+        }
     }
 }

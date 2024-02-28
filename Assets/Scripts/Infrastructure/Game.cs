@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Infrastructure.Services;
 using Assets.Scripts.Infrastructure.States;
+using Assets.Scripts.StaticData;
 using Assets.Scripts.UserInterface;
 using UnityEngine;
 
@@ -7,20 +8,22 @@ namespace Assets.Scripts.Infrastructure
 {
     public class Game
     {
-        private const string InitialScene = "Initial";
+        private readonly GameStaticData _gameStaticData;
         private readonly GameUI _hud;
         private SceneLoader _sceneLoader;
         private ServiceInitializer _serviceInitializer;
         private ServiceLocator _serviceLocator;
         private GameStateMachine _stateMachine;
 
-        public Game(ICoroutineRunner coroutineRunner, GameUI hud)
+        public Game(ICoroutineRunner coroutineRunner, GameUI hud, GameStaticData gameStaticData)
         {
-            _sceneLoader = new SceneLoader(coroutineRunner);
+            _gameStaticData = gameStaticData;
+            _hud = hud;
+
+            _sceneLoader = new SceneLoader(coroutineRunner, gameStaticData);
             _serviceLocator = new ServiceLocator();
             _stateMachine = new GameStateMachine(_sceneLoader, _serviceLocator);
-            _serviceInitializer = new ServiceInitializer(_stateMachine, _serviceLocator);
-            _hud = hud;
+            _serviceInitializer = new ServiceInitializer(_stateMachine, _serviceLocator, gameStaticData, _sceneLoader);
         }
 
         ~Game()
@@ -39,9 +42,9 @@ namespace Assets.Scripts.Infrastructure
             await _serviceInitializer.RegisterServicesAsync();
             _stateMachine.InitializeStateMashine();
 
-            hud.Initialize();
+            hud.Initialize(_serviceLocator);
 
-            _sceneLoader.Load(InitialScene, EnterLoadLevel);
+            _sceneLoader.Load(_gameStaticData.InitialScene, EnterLoadLevel);
         }
 
         private GameUI CreateAndRegisterHUD()

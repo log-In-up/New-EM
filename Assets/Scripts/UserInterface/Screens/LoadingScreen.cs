@@ -1,3 +1,5 @@
+using Assets.Scripts.Infrastructure.Services;
+
 namespace Assets.Scripts.UserInterface.Screens
 {
     public class LoadingScreen : Window
@@ -14,9 +16,9 @@ namespace Assets.Scripts.UserInterface.Screens
             base.Deactivate();
         }
 
-        public override void Setup()
+        public override void Setup(ServiceLocator serviceLocator)
         {
-            base.Setup();
+            base.Setup(serviceLocator);
         }
     }
 }

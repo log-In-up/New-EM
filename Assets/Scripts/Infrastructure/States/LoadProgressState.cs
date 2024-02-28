@@ -6,17 +6,20 @@ namespace Assets.Scripts.Infrastructure.States
 {
     public class LoadProgressState : IState
     {
+        private readonly IGameUI _gameUI;
         private readonly IPersistentProgressService _progressService;
         private readonly ISaveLoadService _saveLoadService;
-        private readonly IGameUI _gameUI;
+        private readonly SceneLoader _sceneLoader;
         private readonly GameStateMachine _stateMachine;
 
         public LoadProgressState(GameStateMachine stateMachine,
+            SceneLoader sceneLoader,
             IPersistentProgressService progressService,
             ISaveLoadService saveLoadService,
             IGameUI gameUI)
         {
             _stateMachine = stateMachine;
+            _sceneLoader = sceneLoader;
             _progressService = progressService;
             _saveLoadService = saveLoadService;
             _gameUI = gameUI;
@@ -26,8 +29,7 @@ namespace Assets.Scripts.Infrastructure.States
         {
             LoadProgress();
 
-            _gameUI.OpenScreen(WindowID.Main);
-            _stateMachine.Enter<PreGameLoopState>();
+            _sceneLoader.LoadScreensaverScene(OnSceneLoad);
         }
 
         public void Exit()
@@ -37,6 +39,12 @@ namespace Assets.Scripts.Infrastructure.States
         private void LoadProgress()
         {
             _progressService.DataProfiles = _saveLoadService.LoadAllProfiles();
+        }
+
+        private void OnSceneLoad()
+        {
+            _gameUI.OpenScreen(WindowID.Main);
+            _stateMachine.Enter<PreGameLoopState>();
         }
     }
 }

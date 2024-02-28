@@ -1,3 +1,5 @@
+using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.Input;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,11 +10,14 @@ namespace Assets.Scripts.UserInterface.Screens
         [SerializeField]
         private Button _close;
 
+        private IInputService _inputService;
+
         public override WindowID ID => WindowID.Settings;
 
         public override void Activate()
         {
             _close.onClick.AddListener(OnClickClose);
+            _inputService.OnClickCancel += OnClickClose;
 
             base.Activate();
         }
@@ -20,18 +25,21 @@ namespace Assets.Scripts.UserInterface.Screens
         public override void Deactivate()
         {
             _close.onClick.RemoveListener(OnClickClose);
+            _inputService.OnClickCancel -= OnClickClose;
 
             base.Deactivate();
         }
 
-        public override void Setup()
+        public override void Setup(ServiceLocator serviceLocator)
         {
-            base.Setup();
+            base.Setup(serviceLocator);
+
+            _inputService = serviceLocator.GetService<IInputService>();
         }
 
         private void OnClickClose()
         {
-            GameUI.OpenScreen(WindowID.Main);
+            GameUI.OpenScreen(GameUI.PeekScreen());
         }
     }
 }

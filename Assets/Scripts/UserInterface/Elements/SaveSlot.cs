@@ -7,16 +7,16 @@ using UnityEngine.EventSystems;
 namespace Assets.Scripts.UserInterface.Elements
 {
     [DisallowMultipleComponent]
-    public class SaveSlot : MonoBehaviour, ISelectHandler
+    public class SaveSlot : MonoBehaviour, ISelectHandler, ISaveSlot
     {
         [SerializeField]
         private TextMeshProUGUI _saveSlotName;
 
         private string _slotName;
 
-        public delegate void SlotName(string saveName);
+        public GameObject GameObject => gameObject;
 
-        public event SlotName OnSelectSlotName;
+        public event ISaveSlot.SlotName OnSelectSlotName;
 
         public void OnSelect(BaseEventData eventData)
         {
