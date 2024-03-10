@@ -3,22 +3,59 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 {
+    /// <summary>
+    /// The interface is responsible for processing in-game save game data.
+    /// </summary>
     public interface ISaveLoadService : IService
     {
-        void CreateNewGame();
+        /// <summary>
+        /// Creates a new save.
+        /// </summary>
+        /// <param name="slotId">Slot name.</param>
+        void CreateNew(string slotId);
 
-        void Delete(string profileId);
+        /// <summary>
+        /// Deletes a save.
+        /// </summary>
+        /// <param name="slotId">Slot name.</param>
+        void Delete(string slotId);
 
-        string GetMostRecentlyUpdatedProfileId();
+        /// <summary>
+        /// Loads save data.
+        /// </summary>
+        /// <param name="slotId">Slot name.</param>
+        /// <returns>Game save data.</returns>
+        GameData Load(string slotId);
 
-        string GetPath(string profileId);
+        /// <summary>
+        /// Loads all saved slots into the game.
+        /// </summary>
+        /// <returns>All saved slots with links to them.</returns>
+        Dictionary<string, GameData> LoadAllSlots();
 
-        GameData Load(string profileId);
-
-        Dictionary<string, GameData> LoadAllProfiles();
-
+        /// <summary>
+        /// Loads the last saved slot.
+        /// </summary>
         void LoadRecentlyUpdatedSave();
 
-        void Save(string profileId);
+        /// <summary>
+        /// Check for the existence of a saved slot.
+        /// </summary>
+        /// <param name="slotId">Slot name.</param>
+        /// <returns>Does a saved slot exist?</returns>
+        bool SlotExist(string slotId);
+
+        /// <summary>
+        /// Changes the slot name.
+        /// </summary>
+        /// <param name="dataProfile">Data profile to rename.</param>
+        /// <param name="newSlotId">New slot name.</param>
+        void Rename(KeyValuePair<string, GameData> dataProfile, string newSlotId);
+
+        /// <summary>
+        /// Saves the game slot.
+        /// </summary>
+        /// <param name="slotId">Slot name.</param>
+        void Save(string slotId);
     }
 }

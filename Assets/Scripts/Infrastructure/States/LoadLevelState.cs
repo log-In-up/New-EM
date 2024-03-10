@@ -1,7 +1,9 @@
 ﻿using Assets.Scripts.Infrastructure.Factory;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.StaticData;
 using Assets.Scripts.UserInterface;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,11 +12,11 @@ namespace Assets.Scripts.Infrastructure.States
     public class LoadLevelState : IPayloadedState<string>
     {
         private readonly IGameFactory _gameFactory;
+        private readonly IGameUI _gameUI;
         private readonly IPersistentProgressService _progressService;
         private readonly SceneLoader _sceneLoader;
         private readonly GameStateMachine _stateMachine;
         private readonly IStaticDataService _staticDataService;
-        private readonly IGameUI _gameUI;
 
         public LoadLevelState(GameStateMachine stateMachine,
             SceneLoader sceneLoader,
@@ -36,8 +38,8 @@ namespace Assets.Scripts.Infrastructure.States
             _gameFactory.CleanUp();
             _gameFactory.WarmUp();
 
-            _gameUI.OpenScreen(WindowID.Loading);
-            _sceneLoader.Load(payload, OnLoaded);
+            AsyncOperation load = _sceneLoader.LoadGameLevel(payload, OnLoaded);
+            _gameUI.OpenScreen(ScreenID.Loading, load);
         }
 
         public void Exit()
@@ -48,7 +50,7 @@ namespace Assets.Scripts.Infrastructure.States
         {
             foreach (IReadProgress progressReader in _gameFactory.ProgressReaders)
             {
-                progressReader.LoadProgress(_progressService.GameData);
+                progressReader.LoadProgress(_progressService.CurrentGameData);
             }
         }
 
@@ -65,7 +67,7 @@ namespace Assets.Scripts.Infrastructure.States
         {
             foreach (EnemySpawnData spawnData in levelStaticData.EnemySpawnData)
             {
-                _gameFactory.CreateSpawner(spawnData);
+                _gameFactory.CreateEnemySpawner(spawnData);
             }
         }
 

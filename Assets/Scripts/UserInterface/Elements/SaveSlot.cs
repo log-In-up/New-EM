@@ -14,9 +14,9 @@ namespace Assets.Scripts.UserInterface.Elements
 
         private string _slotName;
 
-        public GameObject GameObject => gameObject;
-
         public event ISaveSlot.SlotName OnSelectSlotName;
+
+        public GameObject GameObject => gameObject;
 
         public void OnSelect(BaseEventData eventData)
         {

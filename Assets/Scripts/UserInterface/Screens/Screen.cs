@@ -1,15 +1,16 @@
 ﻿using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using UnityEngine;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
     [DisallowMultipleComponent]
-    public abstract class Window : MonoBehaviour
+    public abstract class Screen : MonoBehaviour
     {
         private IGameUI _gameUi = null;
         private bool _isOpened = default;
         public IGameUI GameUI => _gameUi;
-        public abstract WindowID ID { get; }
+        public abstract ScreenID ID { get; }
         public bool IsOpen => _isOpened;
 
         public virtual void Activate()
@@ -31,6 +32,9 @@ namespace Assets.Scripts.UserInterface.Screens
         }
 
         public virtual void Setup(ServiceLocator serviceLocator)
+        { }
+
+        public virtual void SendPayload<TPayload>(TPayload payload) where TPayload : class
         { }
     }
 }

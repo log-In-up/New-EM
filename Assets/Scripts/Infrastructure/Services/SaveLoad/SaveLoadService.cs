@@ -31,74 +31,44 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             _ecriptionCodeWord = ecriptionCodeWord;
         }
 
-        public void CreateNewGame()
+        public void CreateNew(string slotId)
         {
-            _persistentProgressService.GameData = new GameData();
-            Save("New Game");
+            GameData gameData = new GameData();
+
+            _persistentProgressService.CurrentGameData = gameData;
+            Save(slotId);
+
+            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+            _persistentProgressService.ObservableDataProfiles.Add(fullPath, gameData);
         }
 
-        public void Delete(string profileId)
+        public void Delete(string slotId)
         {
-            if (string.IsNullOrEmpty(profileId)) return;
+            if (string.IsNullOrEmpty(slotId)) return;
 
-            string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
+            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+
             try
             {
                 if (File.Exists(fullPath))
                 {
                     Directory.Delete(Path.GetDirectoryName(fullPath), true);
+                    _persistentProgressService.ObservableDataProfiles.Remove(fullPath);
                 }
                 else
                 {
-                    Debug.LogWarning($"Tried to delete profile data, but data was not found at path: {fullPath}");
+                    Debug.LogError($"Tried to delete profile data, but data was not found at path: {fullPath}");
                 }
             }
             catch (Exception exception)
             {
-                Debug.LogError($"Failed to delete profile data for profileId: {profileId} at path: {fullPath}.\n{exception}");
+                Debug.LogError($"Failed to delete profile data for slotId: {slotId} at path: {fullPath}.\n{exception}");
             }
         }
 
-        public string GetMostRecentlyUpdatedProfileId()
+        public GameData Load(string slotId)
         {
-            string mostRecentProfileId = null;
-
-            Dictionary<string, GameData> profilesGameData = LoadAllProfiles();
-
-            foreach (KeyValuePair<string, GameData> pair in profilesGameData)
-            {
-                string profileId = pair.Key;
-                GameData gameData = pair.Value;
-
-                if (gameData == null) continue;
-
-                if (mostRecentProfileId == null)
-                {
-                    mostRecentProfileId = profileId;
-                }
-                else
-                {
-                    long dateData = profilesGameData[mostRecentProfileId].SaveInfo.LastUpdated;
-                    DateTime mostRecentDateTime = DateTime.FromBinary(dateData);
-                    DateTime newDateTime = DateTime.FromBinary(gameData.SaveInfo.LastUpdated);
-
-                    if (newDateTime > mostRecentDateTime)
-                    {
-                        mostRecentProfileId = profileId;
-                    }
-                }
-            }
-            return mostRecentProfileId;
-        }
-
-        public string GetPath(string profileId)
-        {
-            return Path.GetDirectoryName(Path.Combine(_dataDirPath, profileId, _dataFileName));
-        }
-
-        public GameData Load(string profileId)
-        {
-            string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
+            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
             GameData loadedData = null;
 
             if (File.Exists(fullPath))
@@ -130,31 +100,31 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             return loadedData;
         }
 
-        public Dictionary<string, GameData> LoadAllProfiles()
+        public Dictionary<string, GameData> LoadAllSlots()
         {
             Dictionary<string, GameData> profileDictionary = new Dictionary<string, GameData>();
 
             IEnumerable<DirectoryInfo> directoryInfos = new DirectoryInfo(_dataDirPath).EnumerateDirectories();
             foreach (DirectoryInfo directoryInfo in directoryInfos)
             {
-                string profileId = directoryInfo.FullName;
-                string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
+                string slotId = directoryInfo.FullName;
+                string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
 
                 if (!File.Exists(fullPath))
                 {
-                    Debug.LogWarning($"Skipping directory when loading all profiles because it does not contain data: {profileId}.");
+                    Debug.LogWarning($"Skipping directory when loading all profiles because it does not contain data: {slotId}.");
                     continue;
                 }
 
-                GameData data = Load(profileId);
+                GameData data = Load(slotId);
 
                 if (data != null)
                 {
-                    profileDictionary.Add(profileId, data);
+                    profileDictionary.Add(slotId, data);
                 }
                 else
                 {
-                    Debug.LogError($"Tried to load profile but something went wrong. ProfileID: {profileId}.");
+                    Debug.LogError($"Tried to load profile but something went wrong. slotId: {slotId}.");
                 }
             }
 
@@ -163,24 +133,58 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
         public void LoadRecentlyUpdatedSave()
         {
-            string profileId = GetMostRecentlyUpdatedProfileId();
-            _persistentProgressService.GameData = Load(profileId);
+            string slotId = GetMostRecentlyUpdatedslotId();
+
+            _persistentProgressService.CurrentGameData = Load(slotId);
         }
 
-        public void Save(string profileId)
+        public bool SlotExist(string slotId)
+        {
+            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+            string directoryPath = Path.GetDirectoryName(fullPath);
+
+            bool result = _persistentProgressService.ObservableDataProfiles.ContainsKey(fullPath) ||
+                _persistentProgressService.ObservableDataProfiles.ContainsKey(directoryPath);
+
+            return result;
+        }
+
+        public void Rename(KeyValuePair<string, GameData> dataProfile, string newSlotId)
+        {
+            string currentDirectoryName = dataProfile.Key;
+            string newDirectoryName = Path.Combine(_dataDirPath, newSlotId);
+
+            try
+            {
+                Directory.Move(currentDirectoryName, newDirectoryName);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"Error occured when trying to rename file.\n{exception}");
+            }
+
+            GameData data = _persistentProgressService.ObservableDataProfiles[currentDirectoryName];
+            _persistentProgressService.ObservableDataProfiles.Remove(currentDirectoryName);
+
+            DirectoryInfo newDirectory = new DirectoryInfo(newDirectoryName);
+            _persistentProgressService.ObservableDataProfiles.Add(newDirectory.FullName, data);
+
+            dataProfile.Value.SaveInfo.Name = newSlotId;
+        }
+
+        public void Save(string slotId)
         {
             InformProgressWriters();
 
-            string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
-
+            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                SaveInfo saveInfo = new SaveInfo(DateTime.Now.Ticks, profileId);
-                _persistentProgressService.GameData.SaveInfo = saveInfo;
+                SaveInfo saveInfo = new SaveInfo(DateTime.Now.Ticks, slotId);
+                _persistentProgressService.CurrentGameData.SaveInfo = saveInfo;
 
-                string dataToStore = JsonUtility.ToJson(_persistentProgressService.GameData, true);
+                string dataToStore = JsonUtility.ToJson(_persistentProgressService.CurrentGameData, true);
 
                 if (_useIncription)
                 {
@@ -203,21 +207,53 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
         private string EncryptDecrypt(string data)
         {
-            string modifiedData = "";
+            string modifiedData = string.Empty;
 
-            for (int i = 0; i < data.Length; i++)
+            for (int index = 0; index < data.Length; index++)
             {
-                modifiedData += (char)(data[i] ^ _ecriptionCodeWord[i % _ecriptionCodeWord.Length]);
+                modifiedData += (char)(data[index] ^ _ecriptionCodeWord[index % _ecriptionCodeWord.Length]);
             }
 
             return modifiedData;
+        }
+
+        private string GetMostRecentlyUpdatedslotId()
+        {
+            string mostRecentSlotId = string.Empty;
+
+            Dictionary<string, GameData> profilesGameData = LoadAllSlots();
+
+            foreach (KeyValuePair<string, GameData> pair in profilesGameData)
+            {
+                string slotId = pair.Key;
+                GameData gameData = pair.Value;
+
+                if (gameData == null) continue;
+
+                if (string.IsNullOrEmpty(mostRecentSlotId))
+                {
+                    mostRecentSlotId = slotId;
+                }
+                else
+                {
+                    long dateData = profilesGameData[mostRecentSlotId].SaveInfo.LastUpdated;
+                    DateTime mostRecentDateTime = DateTime.FromBinary(dateData);
+                    DateTime newDateTime = DateTime.FromBinary(gameData.SaveInfo.LastUpdated);
+
+                    if (newDateTime > mostRecentDateTime)
+                    {
+                        mostRecentSlotId = slotId;
+                    }
+                }
+            }
+            return mostRecentSlotId;
         }
 
         private void InformProgressWriters()
         {
             foreach (ISaveProgress progressWriter in _gameFactory.ProgressWriters)
             {
-                progressWriter.UpdateProgress(_persistentProgressService.GameData);
+                progressWriter.UpdateProgress(_persistentProgressService.CurrentGameData);
             }
         }
     }

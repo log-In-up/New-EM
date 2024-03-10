@@ -22,6 +22,15 @@ namespace Assets.Scripts.Infrastructure
             _coroutineRunner.StartCoroutine(LoadScene(sceneName, onLoaded));
         }
 
+        public AsyncOperation LoadGameLevel(string sceneName, Action onLoaded = null)
+        {
+            AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneName);
+
+            _coroutineRunner.StartCoroutine(LoadScene(asyncOperation, onLoaded));
+
+            return asyncOperation;
+        }
+
         public void LoadScreensaverScene(Action onLoaded = null)
         {
             _coroutineRunner.StartCoroutine(LoadScene(_gameStaticData.GameScreensaver, onLoaded));
@@ -38,6 +47,16 @@ namespace Assets.Scripts.Infrastructure
             AsyncOperation waitNextScene = SceneManager.LoadSceneAsync(sceneName);
 
             while (!waitNextScene.isDone)
+            {
+                yield return null;
+            }
+
+            onLoaded?.Invoke();
+        }
+
+        private IEnumerator LoadScene(AsyncOperation asyncOperation, Action onLoaded = null)
+        {
+            while (!asyncOperation.isDone)
             {
                 yield return null;
             }

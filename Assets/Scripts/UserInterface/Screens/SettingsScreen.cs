@@ -5,14 +5,14 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
-    public class SettingsScreen : Window
+    public class SettingsScreen : Screen
     {
         [SerializeField]
         private Button _close;
 
         private IInputService _inputService;
 
-        public override WindowID ID => WindowID.Settings;
+        public override ScreenID ID => ScreenID.Settings;
 
         public override void Activate()
         {
@@ -39,7 +39,7 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void OnClickClose()
         {
-            GameUI.OpenScreen(GameUI.PeekScreen());
+            GameUI.OpenScreen(GameUI.PopScreen());
         }
     }
 }

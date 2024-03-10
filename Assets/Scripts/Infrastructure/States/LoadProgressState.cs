@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface;
 
 namespace Assets.Scripts.Infrastructure.States
@@ -38,12 +39,15 @@ namespace Assets.Scripts.Infrastructure.States
 
         private void LoadProgress()
         {
-            _progressService.DataProfiles = _saveLoadService.LoadAllProfiles();
+            foreach (System.Collections.Generic.KeyValuePair<string, Data.GameData> item in _saveLoadService.LoadAllSlots())
+            {
+                _progressService.ObservableDataProfiles.Add(item.Key, item.Value);
+            }
         }
 
         private void OnSceneLoad()
         {
-            _gameUI.OpenScreen(WindowID.Main);
+            _gameUI.OpenScreen(ScreenID.Main);
             _stateMachine.Enter<PreGameLoopState>();
         }
     }

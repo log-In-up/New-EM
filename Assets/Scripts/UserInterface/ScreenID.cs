@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.UserInterface
 {
-    public enum WindowID
+    public enum ScreenID
     {
         Loading = 0,
         Main = 1,

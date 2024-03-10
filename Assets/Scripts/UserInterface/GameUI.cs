@@ -1,46 +1,46 @@
 using Assets.Scripts.Infrastructure.Services;
-using Assets.Scripts.UserInterface.Screens;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
+using Assets.Scripts.UserInterface.DialogueScreens;
 using System.Collections.Generic;
 using UnityEngine;
+using Screen = Assets.Scripts.UserInterface.Screens.Screen;
 
 namespace Assets.Scripts.UserInterface
 {
     [DisallowMultipleComponent]
-    public class GameUI : MonoBehaviour, IGameUI
+    public class GameUI : MonoBehaviour, IGameUI, IGameDialogUI
     {
         [SerializeField]
-        private List<Window> _windows;
+        private RectTransform _dialogBackground;
 
-        private Stack<WindowID> _windowIDs;
+        [SerializeField]
+        private List<DialogueWindow> _dialogueWindows;
 
-        private void Awake()
+        [SerializeField]
+        private List<Screen> _screens;
+
+        private Stack<ScreenID> _windowIDs;
+
+        public void ClearScreens()
         {
-            _windowIDs = new Stack<WindowID>();
+            _windowIDs.Clear();
         }
 
-        public void Initialize(ServiceLocator serviceLocator)
+        public void CloseDialogWindows()
         {
-            InitializeScreens(serviceLocator);
-        }
-
-        public void OpenScreen(WindowID screenID)
-        {
-            foreach (Window window in _windows)
+            foreach (DialogueWindow dialogueWindow in _dialogueWindows)
             {
-                if (window.ID.Equals(screenID))
+                if (dialogueWindow.IsOpen)
                 {
-                    window.Activate();
-                }
-                else if (window.IsOpen)
-                {
-                    window.Deactivate();
+                    dialogueWindow.Deactivate();
                 }
             }
+            _dialogBackground.gameObject.SetActive(false);
         }
 
-        private void InitializeScreens(ServiceLocator serviceLocator)
+        public void InitializeScreens(ServiceLocator serviceLocator)
         {
-            foreach (Window screen in _windows)
+            foreach (Screen screen in _screens)
             {
                 screen.SetScreenData(this);
 
@@ -48,19 +48,73 @@ namespace Assets.Scripts.UserInterface
             }
         }
 
-        public void ClearScreens()
+        public void InitializeWindows(ServiceLocator serviceLocator)
         {
-            _windowIDs.Clear();
+            _dialogBackground.gameObject.SetActive(false);
+
+            foreach (DialogueWindow dialogueWindow in _dialogueWindows)
+            {
+                dialogueWindow.Setup(serviceLocator);
+            }
         }
 
-        public WindowID PeekScreen()
+        public void OpenDialogWindow(DialogWindowID dialogWindowID)
+        {
+            int index = _dialogueWindows.FindIndex(window => window.ID == dialogWindowID);
+
+            _dialogBackground.gameObject.SetActive(true);
+            _dialogueWindows[index].Activate();
+        }
+
+        public void OpenScreen(ScreenID screenID)
+        {
+            foreach (Screen screen in _screens)
+            {
+                if (screen.ID.Equals(screenID))
+                {
+                    screen.Activate();
+                }
+                else if (screen.IsOpen)
+                {
+                    screen.Deactivate();
+                }
+            }
+        }
+
+        public void OpenScreen<TPayload>(ScreenID screenID, TPayload payload) where TPayload : class
+        {
+            foreach (Screen screen in _screens)
+            {
+                if (screen.ID.Equals(screenID))
+                {
+                    screen.SendPayload(payload);
+                    screen.Activate();
+                }
+                else if (screen.IsOpen)
+                {
+                    screen.Deactivate();
+                }
+            }
+        }
+
+        public ScreenID PeekScreen()
         {
             return _windowIDs.Peek();
         }
 
-        public void PushScreen(WindowID screenID)
+        public ScreenID PopScreen()
+        {
+            return _windowIDs.Pop();
+        }
+
+        public void PushScreen(ScreenID screenID)
         {
             _windowIDs.Push(screenID);
+        }
+
+        private void Awake()
+        {
+            _windowIDs = new Stack<ScreenID>();
         }
     }
 }

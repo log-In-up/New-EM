@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
-    public class GamePauseScreen : Window
+    public class GamePauseScreen : Screen
     {
         [SerializeField]
         private Button _continue;
@@ -27,7 +27,7 @@ namespace Assets.Scripts.UserInterface.Screens
         private ISceneLoader _sceneLoaderService;
         private IGameStateMachine _stateMachine;
 
-        public override WindowID ID => WindowID.GamePauseScreen;
+        public override ScreenID ID => ScreenID.GamePauseScreen;
 
         public override void Activate()
         {
@@ -68,13 +68,13 @@ namespace Assets.Scripts.UserInterface.Screens
         private void OnClickCancel()
         {
             _pauseContinueService.Continue();
-            GameUI.OpenScreen(WindowID.Gameplay);
+            GameUI.OpenScreen(ScreenID.Gameplay);
         }
 
         private void OnClickLoad()
         {
             GameUI.PushScreen(ID);
-            GameUI.OpenScreen(WindowID.SafeAndLoad);
+            GameUI.OpenScreen(ScreenID.SafeAndLoad);
         }
 
         private void OnClickQuit()
@@ -88,14 +88,14 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             _pauseContinueService.Continue();
 
-            GameUI.OpenScreen(WindowID.Main);
+            GameUI.OpenScreen(ScreenID.Main);
             _stateMachine.Enter<PreGameLoopState>();
         }
 
         private void OnClickSettings()
         {
             GameUI.PushScreen(ID);
-            GameUI.OpenScreen(WindowID.Settings);
+            GameUI.OpenScreen(ScreenID.Settings);
         }
     }
 }

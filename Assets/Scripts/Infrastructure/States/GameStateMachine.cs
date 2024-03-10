@@ -3,8 +3,8 @@ using Assets.Scripts.Infrastructure.Services;
 using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.StaticData;
-using Assets.Scripts.UserInterface;
 using System;
 using System.Collections.Generic;
 
@@ -76,7 +76,9 @@ namespace Assets.Scripts.Infrastructure.States
             return state;
         }
 
-        private TState GetState<TState>() where TState : class, IExitableState =>
-            _states[typeof(TState)] as TState;
+        private TState GetState<TState>() where TState : class, IExitableState
+        {
+            return _states[typeof(TState)] as TState;
+        }
     }
 }

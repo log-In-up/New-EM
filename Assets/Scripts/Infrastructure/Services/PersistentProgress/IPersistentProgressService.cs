@@ -1,11 +1,21 @@
 ﻿using Assets.Scripts.Data;
-using System.Collections.Generic;
+using Assets.Scripts.Utility;
 
 namespace Assets.Scripts.Infrastructure.Services.PersistentProgress
 {
+    /// <summary>
+    /// The Persistent Progress Service is responsible for accessing save data.
+    /// </summary>
     public interface IPersistentProgressService : IService
     {
-        Dictionary<string, GameData> DataProfiles { get; set; }
-        GameData GameData { get; set; }
+        /// <summary>
+        /// Current game data.
+        /// </summary>
+        GameData CurrentGameData { get; set; }
+
+        /// <summary>
+        /// All game data files.
+        /// </summary>
+        ObservableDictionary<string, GameData> ObservableDataProfiles { get; set; }
     }
 }

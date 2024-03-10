@@ -3,18 +3,23 @@ using Assets.Scripts.Infrastructure.Services;
 using Assets.Scripts.Infrastructure.Services.Input;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.UserInterface.Elements;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
-    public class SaveAndLoadScreen : Window
+    public class SaveAndLoadScreen : Screen
     {
         [SerializeField]
         private Button _close;
+
+        [SerializeField]
+        private Button _createSave;
 
         [SerializeField]
         private Button _deleteSave;
@@ -28,6 +33,7 @@ namespace Assets.Scripts.UserInterface.Screens
         [SerializeField]
         private RectTransform _viewportParent;
 
+        private IGameDialogUI _gameDialogUI;
         private IInputService _inputService;
         private IPersistentProgressService _persistentProgressService;
         private ISaveLoadService _saveLoadService;
@@ -35,14 +41,26 @@ namespace Assets.Scripts.UserInterface.Screens
         private List<ISaveSlot> _saveSlots;
         private IGameStateMachine _stateMachine;
 
-        public override WindowID ID => WindowID.SafeAndLoad;
+        public override ScreenID ID => ScreenID.SafeAndLoad;
 
         public override void Activate()
         {
+            if (GameUI.PeekScreen() == ScreenID.GamePauseScreen)
+            {
+                _createSave.gameObject.SetActive(true);
+                _createSave.onClick.AddListener(OnClickCreateSave);
+            }
+            else
+            {
+                _createSave.gameObject.SetActive(false);
+            }
+
             _close.onClick.AddListener(OnClickClose);
-            _inputService.OnClickCancel += OnClickClose;
             _deleteSave.onClick.AddListener(OnClickDeleteSave);
             _loadSave.onClick.AddListener(OnClickLoadSave);
+
+            _inputService.OnClickCancel += OnClickClose;
+            _persistentProgressService.ObservableDataProfiles.CollectionChanged += SaveCollectionChanged;
 
             _deleteSave.interactable = false;
             _loadSave.interactable = false;
@@ -56,12 +74,16 @@ namespace Assets.Scripts.UserInterface.Screens
         public override void Deactivate()
         {
             _close.onClick.RemoveListener(OnClickClose);
-            _inputService.OnClickCancel -= OnClickClose;
             _deleteSave.onClick.RemoveListener(OnClickDeleteSave);
             _loadSave.onClick.RemoveListener(OnClickLoadSave);
+            _createSave.onClick.RemoveListener(OnClickCreateSave);
+
+            _inputService.OnClickCancel -= OnClickClose;
+            _persistentProgressService.ObservableDataProfiles.CollectionChanged -= SaveCollectionChanged;
 
             base.Deactivate();
 
+            _createSave.gameObject.SetActive(true);
             ClearSaveSlots();
         }
 
@@ -75,6 +97,7 @@ namespace Assets.Scripts.UserInterface.Screens
             _persistentProgressService = serviceLocator.GetService<IPersistentProgressService>();
             _saveLoadService = serviceLocator.GetService<ISaveLoadService>();
             _stateMachine = serviceLocator.GetService<IGameStateMachine>();
+            _gameDialogUI = serviceLocator.GetService<IGameDialogUI>();
         }
 
         private void ClearSaveSlots()
@@ -90,7 +113,7 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void CreateSaveSlots()
         {
-            foreach (KeyValuePair<string, GameData> item in _persistentProgressService.DataProfiles)
+            foreach (KeyValuePair<string, GameData> item in _persistentProgressService.ObservableDataProfiles)
             {
                 ISaveSlot saveSlot = Instantiate(_saveSlotExample, _viewportParent);
                 saveSlot.SetSlotData(item.Value.SaveInfo);
@@ -106,21 +129,19 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void OnClickClose()
         {
-            GameUI.OpenScreen(GameUI.PeekScreen());
+            GameUI.OpenScreen(GameUI.PopScreen());
+        }
+
+        private void OnClickCreateSave()
+        {
+            _gameDialogUI.OpenDialogWindow(DialogWindowID.CreateSave);
         }
 
         private void OnClickDeleteSave()
         {
             if (string.IsNullOrEmpty(_saveName)) return;
 
-            ClearSaveSlots();
-
             _saveLoadService.Delete(_saveName);
-            string fullPath = _saveLoadService.GetPath(_saveName);
-
-            _persistentProgressService.DataProfiles.Remove(fullPath);
-
-            CreateSaveSlots();
 
             _saveName = string.Empty;
             _deleteSave.interactable = false;
@@ -131,9 +152,9 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             if (string.IsNullOrEmpty(_saveName)) return;
 
-            _persistentProgressService.GameData = _saveLoadService.Load(_saveName);
+            _persistentProgressService.CurrentGameData = _saveLoadService.Load(_saveName);
 
-            _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.GameData.CurrentLevel);
+            _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.CurrentGameData.CurrentLevel);
         }
 
         private void OnSelectSlotName(string saveName)
@@ -142,6 +163,12 @@ namespace Assets.Scripts.UserInterface.Screens
 
             _deleteSave.interactable = true;
             _loadSave.interactable = true;
+        }
+
+        private void SaveCollectionChanged(object sender, NotifyCollectionChangedEventArgs eventArgs)
+        {
+            ClearSaveSlots();
+            CreateSaveSlots();
         }
     }
 }

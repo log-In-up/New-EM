@@ -4,12 +4,12 @@ using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
-    public class GameplayScreen : Window
+    public class GameplayScreen : Screen
     {
         private IInputService _inputService;
         private IPauseContinueService _pauseContinueService;
 
-        public override WindowID ID => WindowID.Gameplay;
+        public override ScreenID ID => ScreenID.Gameplay;
 
         public override void Activate()
         {
@@ -39,7 +39,7 @@ namespace Assets.Scripts.UserInterface.Screens
         private void OnClickCancel()
         {
             _pauseContinueService.Pause();
-            GameUI.OpenScreen(WindowID.GamePauseScreen);
+            GameUI.OpenScreen(ScreenID.GamePauseScreen);
         }
     }
 }

@@ -39,12 +39,12 @@ namespace Assets.Scripts.Infrastructure.Factory
             _assetProvider.CleanUp();
         }
 
-        public async Task<GameObject> CreateEnemy(EnemyTypeId typeId, Transform parent)
+        public async Task<GameObject> CreateEnemy(EnemyTypeId typeId, Vector3 position, Quaternion rotation)
         {
             EnemyStaticData enemyStaticData = _staticData.GetEnemyData(typeId);
 
             GameObject prefab = await _assetProvider.Load<GameObject>(enemyStaticData.PrefabReference);
-            GameObject enemy = Object.Instantiate(prefab, parent.position, Quaternion.identity, parent);
+            GameObject enemy = Object.Instantiate(prefab, position, rotation);
 
             foreach (IEnemyConstructor<EnemyStaticData> constructor in enemy.GetComponents<IEnemyConstructor<EnemyStaticData>>())
             {
@@ -54,14 +54,7 @@ namespace Assets.Scripts.Infrastructure.Factory
             return enemy;
         }
 
-        public async Task<GameObject> CreatePlayer(Vector3 position, Quaternion rotation)
-        {
-            GameObject prefab = await _assetProvider.Load<GameObject>(AssetsAddress.Player);
-
-            return InstantiateRegistered(prefab, position, rotation);
-        }
-
-        public async Task CreateSpawner(EnemySpawnData spawnData)
+        public async Task CreateEnemySpawner(EnemySpawnData spawnData)
         {
             GameObject prefab = await _assetProvider.Load<GameObject>(AssetsAddress.Spawner);
 
@@ -73,6 +66,13 @@ namespace Assets.Scripts.Infrastructure.Factory
             spawner.EnemyType = spawnData.Type;
         }
 
+        public async Task<GameObject> CreatePlayer(Vector3 position, Quaternion rotation)
+        {
+            GameObject prefab = await _assetProvider.Load<GameObject>(AssetsAddress.Player);
+
+            return InstantiateRegistered(prefab, position, rotation);
+        }
+
         public async Task WarmUp()
         {
             await _assetProvider.Load<GameObject>(AssetsAddress.Spawner);
@@ -82,15 +82,6 @@ namespace Assets.Scripts.Infrastructure.Factory
         private GameObject InstantiateRegistered(GameObject prefab, Vector3 position, Quaternion rotation)
         {
             GameObject gameObject = Object.Instantiate(prefab, position, rotation);
-
-            RegisterProgressWatchers(gameObject);
-
-            return gameObject;
-        }
-
-        private GameObject InstantiateRegistered(GameObject prefab)
-        {
-            GameObject gameObject = Object.Instantiate(prefab);
 
             RegisterProgressWatchers(gameObject);
 

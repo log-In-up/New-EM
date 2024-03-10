@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.StaticData;
 using Assets.Scripts.UserInterface;
@@ -37,12 +38,13 @@ namespace Assets.Scripts.Infrastructure
         public async void Launch()
         {
             GameUI hud = CreateAndRegisterHUD();
-            hud.OpenScreen(WindowID.Title);
+            hud.OpenScreen(ScreenID.Title);
 
             await _serviceInitializer.RegisterServicesAsync();
             _stateMachine.InitializeStateMashine();
 
-            hud.Initialize(_serviceLocator);
+            hud.InitializeScreens(_serviceLocator);
+            hud.InitializeWindows(_serviceLocator);
 
             _sceneLoader.Load(_gameStaticData.InitialScene, EnterLoadLevel);
         }
@@ -51,7 +53,9 @@ namespace Assets.Scripts.Infrastructure
         {
             GameUI hud = Object.Instantiate(_hud);
             Object.DontDestroyOnLoad(hud);
+
             _serviceLocator.RegisterService<IGameUI>(hud);
+            _serviceLocator.RegisterService<IGameDialogUI>(hud);
 
             return hud;
         }

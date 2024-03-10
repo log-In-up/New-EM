@@ -11,7 +11,7 @@ using Assets.Scripts.Infrastructure.Services.Input;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
-    public class MainScreen : Window
+    public class MainScreen : Screen
     {
         [SerializeField]
         private Button _continue;
@@ -35,14 +35,14 @@ namespace Assets.Scripts.UserInterface.Screens
         private IInputService _inputService;
 #endif
 
-        public override WindowID ID => WindowID.Main;
+        public override ScreenID ID => ScreenID.Main;
 
         public override void Activate()
         {
             GameUI.ClearScreens();
             GameUI.PushScreen(ID);
 
-            if (_persistentProgressService.DataProfiles.Count <= 0)
+            if (_persistentProgressService.ObservableDataProfiles.Keys.Count <= 0)
             {
                 _continue.gameObject.SetActive(false);
                 _start.onClick.AddListener(OnClickStart);
@@ -59,37 +59,31 @@ namespace Assets.Scripts.UserInterface.Screens
 
             _load.onClick.AddListener(OnClickLoad);
             _quit.onClick.AddListener(OnClickQuit);
+            _settings.onClick.AddListener(OnClickSettings);
 #if UNITY_ANDROID || UNITY_IOS
             _inputService.OnClickCancel += OnClickQuit;
 #endif
-            _settings.onClick.AddListener(OnClickSettings);
 
             base.Activate();
         }
 
         public override void Deactivate()
         {
-            if (_persistentProgressService.DataProfiles.Count <= 0)
-            {
-                _continue.gameObject.SetActive(true);
-                _start.onClick.RemoveListener(OnClickStart);
-            }
-            else
-            {
-                _start.gameObject.SetActive(true);
-                _continue.onClick.RemoveListener(OnClickContinue);
-            }
-
+            _continue.onClick.RemoveListener(OnClickContinue);
             _load.onClick.RemoveListener(OnClickLoad);
             _quit.onClick.RemoveListener(OnClickQuit);
+            _settings.onClick.RemoveListener(OnClickSettings);
+            _start.onClick.RemoveListener(OnClickStart);
 #if UNITY_ANDROID || UNITY_IOS
             _inputService.OnClickCancel -= OnClickQuit;
 #endif
-            _settings.onClick.RemoveListener(OnClickSettings);
 
             _load.interactable = true;
 
             base.Deactivate();
+
+            _continue.gameObject.SetActive(true);
+            _start.gameObject.SetActive(true);
         }
 
         public override void Setup(ServiceLocator serviceLocator)
@@ -108,12 +102,12 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             _saveLoadService.LoadRecentlyUpdatedSave();
 
-            _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.GameData.CurrentLevel);
+            _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.CurrentGameData.CurrentLevel);
         }
 
         private void OnClickLoad()
         {
-            GameUI.OpenScreen(WindowID.SafeAndLoad);
+            GameUI.OpenScreen(ScreenID.SafeAndLoad);
         }
 
         private void OnClickQuit()
@@ -127,14 +121,14 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void OnClickSettings()
         {
-            GameUI.OpenScreen(WindowID.Settings);
+            GameUI.OpenScreen(ScreenID.Settings);
         }
 
         private void OnClickStart()
         {
-            _saveLoadService.CreateNewGame();
+            _saveLoadService.CreateNew("New Game");
 
-            _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.GameData.CurrentLevel);
+            _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.CurrentGameData.CurrentLevel);
         }
     }
 }

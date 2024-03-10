@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface;
 
 namespace Assets.Scripts.Infrastructure.States
@@ -20,7 +21,7 @@ namespace Assets.Scripts.Infrastructure.States
 
         public void Enter()
         {
-            _gameUI.OpenScreen(WindowID.Gameplay);
+            _gameUI.OpenScreen(ScreenID.Gameplay);
 
             if (_pauseContinueService.IsPaused)
             {

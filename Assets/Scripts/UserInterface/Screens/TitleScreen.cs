@@ -1,7 +1,7 @@
 namespace Assets.Scripts.UserInterface.Screens
 {
-    public class TitleScreen : Window
+    public class TitleScreen : Screen
     {
-        public override WindowID ID => WindowID.Title;
+        public override ScreenID ID => ScreenID.Title;
     }
 }
