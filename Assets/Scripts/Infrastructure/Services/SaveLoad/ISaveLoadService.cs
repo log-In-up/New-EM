@@ -48,9 +48,9 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         /// <summary>
         /// Changes the slot name.
         /// </summary>
-        /// <param name="dataProfile">Data profile to rename.</param>
+        /// <param name="oldSlotId">Data slot to rename.</param>
         /// <param name="newSlotId">New slot name.</param>
-        void Rename(KeyValuePair<string, GameData> dataProfile, string newSlotId);
+        void Rename(string oldSlotId, string newSlotId);
 
         /// <summary>
         /// Saves the game slot.

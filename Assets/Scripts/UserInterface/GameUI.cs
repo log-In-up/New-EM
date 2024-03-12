@@ -66,6 +66,17 @@ namespace Assets.Scripts.UserInterface
             _dialogueWindows[index].Activate();
         }
 
+        public void OpenDialogWindow<TPayload>(DialogWindowID dialogWindowID, TPayload payload) where TPayload : class
+        {
+            int index = _dialogueWindows.FindIndex(window => window.ID == dialogWindowID);
+
+            _dialogBackground.gameObject.SetActive(true);
+
+            DialogueWindow dialogueWindow = _dialogueWindows[index];
+            dialogueWindow.SendPayload(payload);
+            dialogueWindow.Activate();
+        }
+
         public void OpenScreen(ScreenID screenID)
         {
             foreach (Screen screen in _screens)

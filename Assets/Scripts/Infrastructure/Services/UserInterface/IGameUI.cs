@@ -28,6 +28,7 @@ namespace Assets.Scripts.Infrastructure.Services.UserInterface
         /// <summary>
         /// Opens the user interface screen - <see cref="screenID"/>.
         /// </summary>
+        /// <typeparam name="TPayload">Payload type.</typeparam>
         /// <param name="screenID">ID of the screen to open.</param>
         /// <param name="payload">Payload at open screen.</param>
         void OpenScreen<TPayload>(ScreenID screenID, TPayload payload) where TPayload : class;

@@ -39,7 +39,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             Save(slotId);
 
             string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
-            _persistentProgressService.ObservableDataProfiles.Add(fullPath, gameData);
+            _persistentProgressService.ObservableDataSlots.Add(fullPath, gameData);
         }
 
         public void Delete(string slotId)
@@ -53,7 +53,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 if (File.Exists(fullPath))
                 {
                     Directory.Delete(Path.GetDirectoryName(fullPath), true);
-                    _persistentProgressService.ObservableDataProfiles.Remove(fullPath);
+                    _persistentProgressService.ObservableDataSlots.Remove(fullPath);
                 }
                 else
                 {
@@ -75,19 +75,15 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             {
                 try
                 {
-                    string dataToLoad = "";
+                    string dataToLoad = string.Empty;
+
                     using (FileStream stream = new FileStream(fullPath, FileMode.Open))
                     {
-                        using (StreamReader reader = new StreamReader(stream))
-                        {
-                            dataToLoad = reader.ReadToEnd();
-                        }
+                        using StreamReader reader = new StreamReader(stream);
+                        dataToLoad = reader.ReadToEnd();
                     }
 
-                    if (_useIncription)
-                    {
-                        dataToLoad = EncryptDecrypt(dataToLoad);
-                    }
+                    dataToLoad = ApplyIncription(dataToLoad);
 
                     loadedData = JsonUtility.FromJson<GameData>(dataToLoad);
                 }
@@ -108,7 +104,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             foreach (DirectoryInfo directoryInfo in directoryInfos)
             {
                 string slotId = directoryInfo.FullName;
-                string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+                string fullPath = Path.Combine(_dataDirPath, directoryInfo.Name, _dataFileName);
 
                 if (!File.Exists(fullPath))
                 {
@@ -116,11 +112,11 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                     continue;
                 }
 
-                GameData data = Load(slotId);
+                GameData data = Load(directoryInfo.Name);
 
                 if (data != null)
                 {
-                    profileDictionary.Add(slotId, data);
+                    profileDictionary.Add(fullPath, data);
                 }
                 else
                 {
@@ -133,43 +129,47 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
         public void LoadRecentlyUpdatedSave()
         {
-            string slotId = GetMostRecentlyUpdatedslotId();
+            string slotId = GetMostRecentlyUpdatedSlotId();
 
             _persistentProgressService.CurrentGameData = Load(slotId);
         }
 
-        public bool SlotExist(string slotId)
+        public void Rename(string oldSlotId, string newSlotId)
         {
-            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
-            string directoryPath = Path.GetDirectoryName(fullPath);
-
-            bool result = _persistentProgressService.ObservableDataProfiles.ContainsKey(fullPath) ||
-                _persistentProgressService.ObservableDataProfiles.ContainsKey(directoryPath);
-
-            return result;
-        }
-
-        public void Rename(KeyValuePair<string, GameData> dataProfile, string newSlotId)
-        {
-            string currentDirectoryName = dataProfile.Key;
+            string oldDirectoryName = Path.Combine(_dataDirPath, oldSlotId);
             string newDirectoryName = Path.Combine(_dataDirPath, newSlotId);
 
             try
             {
-                Directory.Move(currentDirectoryName, newDirectoryName);
+                Directory.Move(oldDirectoryName, newDirectoryName);
             }
             catch (Exception exception)
             {
                 Debug.LogError($"Error occured when trying to rename file.\n{exception}");
             }
 
-            GameData data = _persistentProgressService.ObservableDataProfiles[currentDirectoryName];
-            _persistentProgressService.ObservableDataProfiles.Remove(currentDirectoryName);
+            oldDirectoryName = Path.Combine(_dataDirPath, oldSlotId, _dataFileName);
+            newDirectoryName = Path.Combine(_dataDirPath, newSlotId, _dataFileName);
 
-            DirectoryInfo newDirectory = new DirectoryInfo(newDirectoryName);
-            _persistentProgressService.ObservableDataProfiles.Add(newDirectory.FullName, data);
+            GameData data = _persistentProgressService.ObservableDataSlots[oldDirectoryName];
 
-            dataProfile.Value.SaveInfo.Name = newSlotId;
+            SaveInfo saveInfo = new SaveInfo(DateTime.Now.Ticks, newSlotId);
+            _persistentProgressService.CurrentGameData.SaveInfo = saveInfo;
+
+            data.SaveInfo = saveInfo;
+
+            if (_persistentProgressService.CurrentGameData == data)
+            {
+                _persistentProgressService.CurrentGameData.SaveInfo = saveInfo;
+            }
+
+            string dataToStore = JsonUtility.ToJson(data, true);
+            dataToStore = ApplyIncription(dataToStore);
+
+            WriteDataToFile(newDirectoryName, dataToStore);
+
+            _persistentProgressService.ObservableDataSlots.Remove(oldDirectoryName);
+            _persistentProgressService.ObservableDataSlots.Add(newDirectoryName, data);
         }
 
         public void Save(string slotId)
@@ -185,24 +185,32 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 _persistentProgressService.CurrentGameData.SaveInfo = saveInfo;
 
                 string dataToStore = JsonUtility.ToJson(_persistentProgressService.CurrentGameData, true);
+                dataToStore = ApplyIncription(dataToStore);
 
-                if (_useIncription)
-                {
-                    dataToStore = EncryptDecrypt(dataToStore);
-                }
-
-                using (FileStream stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    using (StreamWriter writer = new StreamWriter(stream))
-                    {
-                        writer.Write(dataToStore);
-                    }
-                }
+                WriteDataToFile(fullPath, dataToStore);
             }
             catch (Exception exception)
             {
                 Debug.LogError($"Error occured when trying to save data to file: {fullPath}.\n{exception}");
             }
+        }
+
+        public bool SlotExist(string slotId)
+        {
+            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+            bool result = _persistentProgressService.ObservableDataSlots.ContainsKey(fullPath);
+
+            return result;
+        }
+
+        private string ApplyIncription(string dataToIncription)
+        {
+            if (_useIncription)
+            {
+                dataToIncription = EncryptDecrypt(dataToIncription);
+            }
+
+            return dataToIncription;
         }
 
         private string EncryptDecrypt(string data)
@@ -217,7 +225,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             return modifiedData;
         }
 
-        private string GetMostRecentlyUpdatedslotId()
+        private string GetMostRecentlyUpdatedSlotId()
         {
             string mostRecentSlotId = string.Empty;
 
@@ -225,7 +233,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
             foreach (KeyValuePair<string, GameData> pair in profilesGameData)
             {
-                string slotId = pair.Key;
+                string slotId = Path.GetFileName(Path.GetDirectoryName(pair.Key));
                 GameData gameData = pair.Value;
 
                 if (gameData == null) continue;
@@ -255,6 +263,13 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             {
                 progressWriter.UpdateProgress(_persistentProgressService.CurrentGameData);
             }
+        }
+
+        private void WriteDataToFile(string fullPath, string dataToStore)
+        {
+            using FileStream stream = new FileStream(fullPath, FileMode.Create);
+            using StreamWriter writer = new StreamWriter(stream);
+            writer.Write(dataToStore);
         }
     }
 }

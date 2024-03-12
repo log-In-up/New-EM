@@ -1,7 +1,9 @@
-﻿using Assets.Scripts.Infrastructure.Services.PersistentProgress;
+﻿using Assets.Scripts.Data;
+using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Infrastructure.States
 {
@@ -39,9 +41,9 @@ namespace Assets.Scripts.Infrastructure.States
 
         private void LoadProgress()
         {
-            foreach (System.Collections.Generic.KeyValuePair<string, Data.GameData> item in _saveLoadService.LoadAllSlots())
+            foreach (KeyValuePair<string, GameData> item in _saveLoadService.LoadAllSlots())
             {
-                _progressService.ObservableDataProfiles.Add(item.Key, item.Value);
+                _progressService.ObservableDataSlots.Add(item.Key, item.Value);
             }
         }
 

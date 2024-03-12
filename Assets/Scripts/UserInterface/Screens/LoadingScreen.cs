@@ -1,4 +1,3 @@
-using Assets.Scripts.Infrastructure.Services;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,11 +30,6 @@ namespace Assets.Scripts.UserInterface.Screens
             base.Deactivate();
 
             _progressBar.value = 0;
-        }
-
-        public override void Setup(ServiceLocator serviceLocator)
-        {
-            base.Setup(serviceLocator);
         }
 
         public override void SendPayload<AsyncOperation>(AsyncOperation payload)

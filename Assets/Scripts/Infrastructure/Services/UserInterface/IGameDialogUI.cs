@@ -23,5 +23,13 @@ namespace Assets.Scripts.Infrastructure.Services.UserInterface
         /// </summary>
         /// <param name="dialogWindowID">The ID of the dialog box to open.</param>
         void OpenDialogWindow(DialogWindowID dialogWindowID);
+
+        /// <summary>
+        /// Opens dialog window - <see cref="dialogWindowID"/>.
+        /// </summary>
+        /// <typeparam name="TPayload">Payload type.</typeparam>
+        /// <param name="dialogWindowID"></param>
+        /// <param name="payload">Payload at open window.</param>
+        void OpenDialogWindow<TPayload>(DialogWindowID dialogWindowID, TPayload payload) where TPayload : class;
     }
 }

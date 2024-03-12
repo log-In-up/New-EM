@@ -42,7 +42,7 @@ namespace Assets.Scripts.UserInterface.Screens
             GameUI.ClearScreens();
             GameUI.PushScreen(ID);
 
-            if (_persistentProgressService.ObservableDataProfiles.Keys.Count <= 0)
+            if (_persistentProgressService.ObservableDataSlots.Keys.Count <= 0)
             {
                 _continue.gameObject.SetActive(false);
                 _start.onClick.AddListener(OnClickStart);

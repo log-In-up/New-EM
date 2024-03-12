@@ -25,6 +25,11 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
         }
 
         public virtual void Setup(ServiceLocator serviceLocator)
-        { }
+        {
+        }
+
+        public virtual void SendPayload<TPayload>(TPayload payload) where TPayload : class
+        {
+        }
     }
 }

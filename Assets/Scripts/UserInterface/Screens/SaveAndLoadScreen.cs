@@ -10,11 +10,15 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.UI;
+using System.ComponentModel;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
     public class SaveAndLoadScreen : Screen
     {
+        [SerializeField]
+        private Button _changeName;
+
         [SerializeField]
         private Button _close;
 
@@ -24,22 +28,28 @@ namespace Assets.Scripts.UserInterface.Screens
         [SerializeField]
         private Button _deleteSave;
 
+        private IGameDialogUI _gameDialogUI;
+
+        private IInputService _inputService;
+
         [SerializeField]
         private Button _loadSave;
+
+        private IPersistentProgressService _persistentProgressService;
+
+        private ISaveLoadService _saveLoadService;
+
+        private string _saveName;
 
         [SerializeField]
         private SaveSlot _saveSlotExample;
 
+        private List<ISaveSlot> _saveSlots;
+
+        private IGameStateMachine _stateMachine;
+
         [SerializeField]
         private RectTransform _viewportParent;
-
-        private IGameDialogUI _gameDialogUI;
-        private IInputService _inputService;
-        private IPersistentProgressService _persistentProgressService;
-        private ISaveLoadService _saveLoadService;
-        private string _saveName;
-        private List<ISaveSlot> _saveSlots;
-        private IGameStateMachine _stateMachine;
 
         public override ScreenID ID => ScreenID.SafeAndLoad;
 
@@ -55,15 +65,17 @@ namespace Assets.Scripts.UserInterface.Screens
                 _createSave.gameObject.SetActive(false);
             }
 
+            _changeName.onClick.AddListener(OnClickChangeSaveName);
             _close.onClick.AddListener(OnClickClose);
             _deleteSave.onClick.AddListener(OnClickDeleteSave);
             _loadSave.onClick.AddListener(OnClickLoadSave);
 
             _inputService.OnClickCancel += OnClickClose;
-            _persistentProgressService.ObservableDataProfiles.CollectionChanged += SaveCollectionChanged;
+            _persistentProgressService.ObservableDataSlots.CollectionChanged += SaveCollectionChanged;
 
             _deleteSave.interactable = false;
             _loadSave.interactable = false;
+            _changeName.interactable = false;
             _saveName = string.Empty;
 
             CreateSaveSlots();
@@ -73,13 +85,14 @@ namespace Assets.Scripts.UserInterface.Screens
 
         public override void Deactivate()
         {
+            _changeName.onClick.RemoveListener(OnClickChangeSaveName);
             _close.onClick.RemoveListener(OnClickClose);
+            _createSave.onClick.RemoveListener(OnClickCreateSave);
             _deleteSave.onClick.RemoveListener(OnClickDeleteSave);
             _loadSave.onClick.RemoveListener(OnClickLoadSave);
-            _createSave.onClick.RemoveListener(OnClickCreateSave);
 
             _inputService.OnClickCancel -= OnClickClose;
-            _persistentProgressService.ObservableDataProfiles.CollectionChanged -= SaveCollectionChanged;
+            _persistentProgressService.ObservableDataSlots.CollectionChanged -= SaveCollectionChanged;
 
             base.Deactivate();
 
@@ -113,7 +126,7 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void CreateSaveSlots()
         {
-            foreach (KeyValuePair<string, GameData> item in _persistentProgressService.ObservableDataProfiles)
+            foreach (KeyValuePair<string, GameData> item in _persistentProgressService.ObservableDataSlots)
             {
                 ISaveSlot saveSlot = Instantiate(_saveSlotExample, _viewportParent);
                 saveSlot.SetSlotData(item.Value.SaveInfo);
@@ -125,6 +138,11 @@ namespace Assets.Scripts.UserInterface.Screens
             {
                 item.OnSelectSlotName += OnSelectSlotName;
             }
+        }
+
+        private void OnClickChangeSaveName()
+        {
+            _gameDialogUI.OpenDialogWindow(DialogWindowID.ChangeSave, _saveName);
         }
 
         private void OnClickClose()
@@ -144,6 +162,8 @@ namespace Assets.Scripts.UserInterface.Screens
             _saveLoadService.Delete(_saveName);
 
             _saveName = string.Empty;
+
+            _changeName.interactable = false;
             _deleteSave.interactable = false;
             _loadSave.interactable = false;
         }
@@ -161,6 +181,7 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             _saveName = saveName;
 
+            _changeName.interactable = true;
             _deleteSave.interactable = true;
             _loadSave.interactable = true;
         }
