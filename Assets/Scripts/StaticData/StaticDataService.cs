@@ -48,7 +48,7 @@ namespace Assets.Scripts.StaticData
 
         public async Task LoadDataAsync()
         {
-            IList<IResourceLocation> locations = await _assetProvider.LoadByLabel(_gameStaticData.EnemyStaticDataLabel, typeof(EnemyStaticData));
+            IList<IResourceLocation> locations = await _assetProvider.LoadByLabel(_gameStaticData.EnemyStaticDataLabel.labelString, typeof(EnemyStaticData));
 
             foreach (IResourceLocation location in locations)
             {
@@ -56,7 +56,7 @@ namespace Assets.Scripts.StaticData
                 _enemiesСache.Add(handle.EnemyTypeId, handle);
             }
 
-            locations = await _assetProvider.LoadByLabel(_gameStaticData.LevelStaticDataLabel, typeof(LevelStaticData));
+            locations = await _assetProvider.LoadByLabel(_gameStaticData.LevelStaticDataLabel.labelString, typeof(LevelStaticData));
 
             foreach (IResourceLocation location in locations)
             {

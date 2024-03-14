@@ -4,6 +4,7 @@ using Assets.Scripts.Infrastructure.Services.Input;
 using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
+using Assets.Scripts.Infrastructure.Services.Settings;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.StaticData;
 using System.Threading.Tasks;
@@ -37,6 +38,7 @@ namespace Assets.Scripts.Infrastructure.Services
             _serviceLocator.RegisterService(_sceneLoader);
 
             RegisterAssetProvider();
+            RegisterSettingsService();
             await RegisterStaticDataAsync();
 
             _serviceLocator.RegisterService<IGameFactory>(new GameFactory(
@@ -48,16 +50,31 @@ namespace Assets.Scripts.Infrastructure.Services
             RegisterSaveLoadService();
         }
 
+        private async void RegisterSettingsService()
+        {
+            ISettingsService settingsService = new SettingsService(
+                _serviceLocator.GetService<IAssetProvider>(),
+                _gameStaticData.AudioMixerReference,
+                Application.persistentDataPath,
+                _gameStaticData.SettingsFileName);
+
+            await settingsService.Initialize();
+
+            _serviceLocator.RegisterService(settingsService);
+        }
+
         private void RegisterSaveLoadService()
         {
-            SaveLoadService saveLoadService = new SaveLoadService(
+            ISaveLoadService saveLoadService = new SaveLoadService(
                     _serviceLocator.GetService<IGameFactory>(),
                     _serviceLocator.GetService<IPersistentProgressService>(),
                     Application.persistentDataPath,
                     _gameStaticData.SaveFileName,
                     _gameStaticData.EncryptionCodeWord);
 
-            _serviceLocator.RegisterService<ISaveLoadService>(saveLoadService);
+            saveLoadService.Initialize();
+
+            _serviceLocator.RegisterService(saveLoadService);
         }
 
         private void RegisterAssetProvider()
@@ -65,7 +82,7 @@ namespace Assets.Scripts.Infrastructure.Services
             IAssetProvider assetProvider = new AssetProvider();
             assetProvider.Initialize();
 
-            _serviceLocator.RegisterService<IAssetProvider>(assetProvider);
+            _serviceLocator.RegisterService(assetProvider);
         }
 
         private async Task RegisterStaticDataAsync()

@@ -3,7 +3,6 @@ using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.StaticData;
 using Assets.Scripts.UserInterface;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

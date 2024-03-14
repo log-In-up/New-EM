@@ -10,6 +10,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 {
     public class SaveLoadService : ISaveLoadService
     {
+        private const string SAVES_FOLDER = "Saves";
         private readonly string _dataDirPath, _dataFileName, _ecriptionCodeWord;
         private readonly IGameFactory _gameFactory;
         private readonly IPersistentProgressService _persistentProgressService;
@@ -38,7 +39,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             _persistentProgressService.CurrentGameData = gameData;
             Save(slotId);
 
-            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+            string fullPath = Path.Combine(_dataDirPath, SAVES_FOLDER, slotId, _dataFileName);
             _persistentProgressService.ObservableDataSlots.Add(fullPath, gameData);
         }
 
@@ -46,7 +47,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         {
             if (string.IsNullOrEmpty(slotId)) return;
 
-            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+            string fullPath = Path.Combine(_dataDirPath, SAVES_FOLDER, slotId, _dataFileName);
 
             try
             {
@@ -66,9 +67,26 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             }
         }
 
+        public void Initialize()
+        {
+            string savesDirectory = Path.Combine(_dataDirPath, SAVES_FOLDER);
+
+            if (!Directory.Exists(savesDirectory))
+            {
+                try
+                {
+                    Directory.CreateDirectory(savesDirectory);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogError($"Error occured when trying to create save directory.\n{exception}");
+                }
+            }
+        }
+
         public GameData Load(string slotId)
         {
-            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+            string fullPath = Path.Combine(_dataDirPath, SAVES_FOLDER, slotId, _dataFileName);
             GameData loadedData = null;
 
             if (File.Exists(fullPath))
@@ -100,11 +118,13 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         {
             Dictionary<string, GameData> profileDictionary = new Dictionary<string, GameData>();
 
-            IEnumerable<DirectoryInfo> directoryInfos = new DirectoryInfo(_dataDirPath).EnumerateDirectories();
+            string savesDirectory = Path.Combine(_dataDirPath, SAVES_FOLDER);
+            IEnumerable<DirectoryInfo> directoryInfos = new DirectoryInfo(savesDirectory).EnumerateDirectories();
+
             foreach (DirectoryInfo directoryInfo in directoryInfos)
             {
                 string slotId = directoryInfo.FullName;
-                string fullPath = Path.Combine(_dataDirPath, directoryInfo.Name, _dataFileName);
+                string fullPath = Path.Combine(_dataDirPath, SAVES_FOLDER, directoryInfo.Name, _dataFileName);
 
                 if (!File.Exists(fullPath))
                 {
@@ -136,8 +156,8 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
         public void Rename(string oldSlotId, string newSlotId)
         {
-            string oldDirectoryName = Path.Combine(_dataDirPath, oldSlotId);
-            string newDirectoryName = Path.Combine(_dataDirPath, newSlotId);
+            string oldDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, oldSlotId);
+            string newDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, newSlotId);
 
             try
             {
@@ -148,17 +168,15 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 Debug.LogError($"Error occured when trying to rename file.\n{exception}");
             }
 
-            oldDirectoryName = Path.Combine(_dataDirPath, oldSlotId, _dataFileName);
-            newDirectoryName = Path.Combine(_dataDirPath, newSlotId, _dataFileName);
+            oldDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, oldSlotId, _dataFileName);
+            newDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, newSlotId, _dataFileName);
 
             GameData data = _persistentProgressService.ObservableDataSlots[oldDirectoryName];
 
             SaveInfo saveInfo = new SaveInfo(DateTime.Now.Ticks, newSlotId);
-            _persistentProgressService.CurrentGameData.SaveInfo = saveInfo;
-
             data.SaveInfo = saveInfo;
 
-            if (_persistentProgressService.CurrentGameData == data)
+            if (_persistentProgressService.CurrentGameData != null || _persistentProgressService.CurrentGameData == data)
             {
                 _persistentProgressService.CurrentGameData.SaveInfo = saveInfo;
             }
@@ -176,7 +194,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         {
             InformProgressWriters();
 
-            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
+            string fullPath = Path.Combine(_dataDirPath, SAVES_FOLDER, slotId, _dataFileName);
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
@@ -197,10 +215,8 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
         public bool SlotExist(string slotId)
         {
-            string fullPath = Path.Combine(_dataDirPath, slotId, _dataFileName);
-            bool result = _persistentProgressService.ObservableDataSlots.ContainsKey(fullPath);
-
-            return result;
+            string fullPath = Path.Combine(_dataDirPath, SAVES_FOLDER, slotId, _dataFileName);
+            return _persistentProgressService.ObservableDataSlots.ContainsKey(fullPath);
         }
 
         private string ApplyIncription(string dataToIncription)

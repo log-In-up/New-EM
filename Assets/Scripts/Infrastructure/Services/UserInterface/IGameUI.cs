@@ -1,5 +1,4 @@
 using Assets.Scripts.UserInterface;
-using UnityEngine;
 
 namespace Assets.Scripts.Infrastructure.Services.UserInterface
 {

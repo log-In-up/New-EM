@@ -45,6 +45,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - LevelStaticData
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a240f7d4fd415744b7a4ab739c83ad9
+    m_Address: AudioMixer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: ed53ae4aacd5b664db6354b75f35b575, type: 2}
   m_SchemaSet:

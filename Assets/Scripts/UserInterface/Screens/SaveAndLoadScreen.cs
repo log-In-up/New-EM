@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.UI;
-using System.ComponentModel;
 
 namespace Assets.Scripts.UserInterface.Screens
 {
@@ -28,28 +27,22 @@ namespace Assets.Scripts.UserInterface.Screens
         [SerializeField]
         private Button _deleteSave;
 
-        private IGameDialogUI _gameDialogUI;
-
-        private IInputService _inputService;
-
         [SerializeField]
         private Button _loadSave;
-
-        private IPersistentProgressService _persistentProgressService;
-
-        private ISaveLoadService _saveLoadService;
-
-        private string _saveName;
 
         [SerializeField]
         private SaveSlot _saveSlotExample;
 
-        private List<ISaveSlot> _saveSlots;
-
-        private IGameStateMachine _stateMachine;
-
         [SerializeField]
         private RectTransform _viewportParent;
+
+        private IGameDialogUI _gameDialogUI;
+        private IInputService _inputService;
+        private IPersistentProgressService _persistentProgressService;
+        private ISaveLoadService _saveLoadService;
+        private string _saveName;
+        private List<ISaveSlot> _saveSlots;
+        private IGameStateMachine _stateMachine;
 
         public override ScreenID ID => ScreenID.SafeAndLoad;
 

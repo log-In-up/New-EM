@@ -21,6 +21,11 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         void Delete(string slotId);
 
         /// <summary>
+        /// Initializes the save system.
+        /// </summary>
+        void Initialize();
+
+        /// <summary>
         /// Loads save data.
         /// </summary>
         /// <param name="slotId">Slot name.</param>
@@ -39,13 +44,6 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         void LoadRecentlyUpdatedSave();
 
         /// <summary>
-        /// Check for the existence of a saved slot.
-        /// </summary>
-        /// <param name="slotId">Slot name.</param>
-        /// <returns>Does a saved slot exist?</returns>
-        bool SlotExist(string slotId);
-
-        /// <summary>
         /// Changes the slot name.
         /// </summary>
         /// <param name="oldSlotId">Data slot to rename.</param>
@@ -57,5 +55,12 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         /// </summary>
         /// <param name="slotId">Slot name.</param>
         void Save(string slotId);
+
+        /// <summary>
+        /// Check for the existence of a saved slot.
+        /// </summary>
+        /// <param name="slotId">Slot name.</param>
+        /// <returns>Does a saved slot exist?</returns>
+        bool SlotExist(string slotId);
     }
 }

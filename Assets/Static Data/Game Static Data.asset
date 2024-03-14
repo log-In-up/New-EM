@@ -12,9 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91b62a6e6c11eea40b9e55e900862975, type: 3}
   m_Name: Game Static Data
   m_EditorClassIdentifier: 
+  _audioMixerReference:
+    m_AssetGUID: 8a240f7d4fd415744b7a4ab739c83ad9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 1
   _encryptionCodeWord: EMEncrypt
-  _gameScreensaver: GameScreensaver
-  _initialScene: Initial
+  _enemyStaticDataLabel:
+    m_LabelString: EnemyStaticData
+  _gameScreensaver: {fileID: 102900000, guid: e4852b5eb82bf9a459be84851d4e755c, type: 3}
+  _initialScene: {fileID: 102900000, guid: 99c9720ab356a0642a771bea13969a05, type: 3}
+  _levelStaticDataLabel:
+    m_LabelString: LevelStaticData
   _saveFileName: Save.txt
-  _enemyStaticDataLabel: EnemyStaticData
-  _levelStaticDataLabel: LevelStaticData
+  _settingsFileName: SettingsData.txt
