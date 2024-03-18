@@ -1,3 +1,5 @@
+using System;
+
 namespace Assets.Scripts.UserInterface.DialogueScreens
 {
     public class ChangeSaveWindow : InputFieldWindow
@@ -16,13 +18,14 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
             _inputFieldData = value;
         }
 
-        protected override void OnClickSave()
+        protected override async void OnClickPositive()
         {
-            if (_saveLoadService.SlotExist(_slotToRename))
+            if (await _saveLoadService.SlotExist(_slotToRename))
             {
-                _saveLoadService.Rename(_slotToRename, _inputFieldData);
+                await _saveLoadService.Rename(_slotToRename, _inputFieldData);
             }
-            base.OnClickSave();
+
+            base.OnClickPositive();
         }
     }
 }

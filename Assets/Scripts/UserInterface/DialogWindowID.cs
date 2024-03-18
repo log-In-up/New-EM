@@ -3,6 +3,7 @@
     public enum DialogWindowID
     {
         CreateSave = 0,
-        ChangeSave = 1
+        ChangeSave = 1,
+        OverwriteSave = 2
     }
 }

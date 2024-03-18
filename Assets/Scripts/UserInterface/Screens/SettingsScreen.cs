@@ -30,7 +30,7 @@ namespace Assets.Scripts.UserInterface.Screens
 
             _inputService.OnClickCancel += OnClickClose;
 
-            SetSettings();
+            GetSettings();
 
             _applySettings.interactable = false;
 
@@ -66,6 +66,11 @@ namespace Assets.Scripts.UserInterface.Screens
             }
         }
 
+        private void GetSettings()
+        {
+            _soundMain.value = _settingsService.SettingsData.MasterVolume;
+        }
+
         private void OnChangeMainChannel(float value)
         {
             CheckApplyInteraction();
@@ -77,7 +82,7 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             _applySettings.interactable = false;
 
-            _settingsService.SettingsData.MasterVolume = _soundMain.value;
+            SetSettings();
 
             _settingsService.Save();
         }
@@ -89,7 +94,7 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void SetSettings()
         {
-            _soundMain.value = _settingsService.SettingsData.MasterVolume;
+            _settingsService.SettingsData.MasterVolume = _soundMain.value;
         }
     }
 }

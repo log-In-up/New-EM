@@ -22,7 +22,8 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
         /// <summary>
         /// Saves the settings data.
         /// </summary>
-        void Save();
+        /// <returns>Async task.</returns>
+        Task Save();
 
         /// <summary>
         /// Sets the value of the main sound.

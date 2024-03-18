@@ -3,6 +3,7 @@ using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.Services.Settings;
 using Assets.Scripts.Infrastructure.States;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,7 +48,7 @@ namespace Assets.Scripts.UserInterface.Screens
             if (_persistentProgressService.ObservableDataSlots.Keys.Count <= 0)
             {
                 _continue.gameObject.SetActive(false);
-                _start.onClick.AddListener(OnClickStart);
+                _start.onClick.AddListener(OnClickStartAsync);
 
                 _load.interactable = false;
             }
@@ -75,7 +76,7 @@ namespace Assets.Scripts.UserInterface.Screens
             _load.onClick.RemoveListener(OnClickLoad);
             _quit.onClick.RemoveListener(OnClickQuit);
             _settings.onClick.RemoveListener(OnClickSettings);
-            _start.onClick.RemoveListener(OnClickStart);
+            _start.onClick.RemoveListener(OnClickStartAsync);
 #if UNITY_ANDROID || UNITY_IOS
             _inputService.OnClickCancel -= OnClickQuit;
 #endif
@@ -101,9 +102,9 @@ namespace Assets.Scripts.UserInterface.Screens
 #endif
         }
 
-        private void OnClickContinue()
+        private async void OnClickContinue()
         {
-            _saveLoadService.LoadRecentlyUpdatedSave();
+            await _saveLoadService.LoadRecentlyUpdatedSave();
 
             _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.CurrentGameData.CurrentLevel);
         }
@@ -127,9 +128,9 @@ namespace Assets.Scripts.UserInterface.Screens
             GameUI.OpenScreen(ScreenID.Settings);
         }
 
-        private void OnClickStart()
+        private async void OnClickStartAsync()
         {
-            _saveLoadService.CreateNew("New Game");
+            await _saveLoadService.CreateNew("New Game");
 
             _stateMachine.Enter<LoadLevelState, string>(_persistentProgressService.CurrentGameData.CurrentLevel);
         }

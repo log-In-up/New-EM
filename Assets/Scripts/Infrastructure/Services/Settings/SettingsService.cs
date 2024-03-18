@@ -56,22 +56,25 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
                     Debug.LogError($"Error occured when trying to create sound settings directory.\n{exception}");
                 }
             }
-            _settingsData = Load();
+            _settingsData = await Load();
 
-            _audioMixer.SetFloat(MASTER_GROUP, Mathf.Log10(_settingsData.MasterVolume) * 20);
+            SetSettingsFromDownloadedData();
         }
 
-        public void Save()
+        public Task Save()
         {
-            string fullPath = Path.Combine(_dataDirPath, SETTINGS_FOLDER, _dataFileName);
-            try
+            return Task.Run(() =>
             {
-                WriteData(fullPath, _settingsData);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"Error occured when trying to save data to file: {fullPath}.\n{exception}");
-            }
+                string fullPath = Path.Combine(_dataDirPath, SETTINGS_FOLDER, _dataFileName);
+                try
+                {
+                    WriteData(fullPath, _settingsData);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogError($"Error occured when trying to save data to file: {fullPath}.\n{exception}");
+                }
+            });
         }
 
         public void SetMasterVolume(float value)
@@ -79,38 +82,46 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             _audioMixer.SetFloat(MASTER_GROUP, Mathf.Log10(value) * 20);
         }
 
-        private SettingsData Load()
+        private Task<SettingsData> Load()
         {
-            string fullPath = Path.Combine(_dataDirPath, SETTINGS_FOLDER, _dataFileName);
-            SettingsData loadedData = null;
-
-            if (File.Exists(fullPath))
+            return Task.Run(() =>
             {
-                try
-                {
-                    string dataToLoad = string.Empty;
+                string fullPath = Path.Combine(_dataDirPath, SETTINGS_FOLDER, _dataFileName);
+                SettingsData loadedData = null;
 
-                    using (FileStream stream = new FileStream(fullPath, FileMode.Open))
+                if (File.Exists(fullPath))
+                {
+                    try
                     {
-                        using StreamReader reader = new StreamReader(stream);
-                        dataToLoad = reader.ReadToEnd();
+                        string dataToLoad = string.Empty;
+
+                        using (FileStream stream = new FileStream(fullPath, FileMode.Open))
+                        {
+                            using StreamReader reader = new StreamReader(stream);
+                            dataToLoad = reader.ReadToEnd();
+                        }
+
+                        loadedData = JsonUtility.FromJson<SettingsData>(dataToLoad);
                     }
-
-                    loadedData = JsonUtility.FromJson<SettingsData>(dataToLoad);
+                    catch (Exception exception)
+                    {
+                        Debug.LogError($"Error occured when trying to load data from file: {fullPath}.\n{exception}");
+                    }
                 }
-                catch (Exception exception)
+                else
                 {
-                    Debug.LogError($"Error occured when trying to load data from file: {fullPath}.\n{exception}");
+                    loadedData = new SettingsData();
+
+                    WriteData(fullPath, loadedData);
                 }
-            }
-            else
-            {
-                loadedData = new SettingsData();
 
-                WriteData(fullPath, loadedData);
-            }
+                return loadedData;
+            });
+        }
 
-            return loadedData;
+        private void SetSettingsFromDownloadedData()
+        {
+            SetMasterVolume(_settingsData.MasterVolume);
         }
 
         private void WriteData(string fullPath, SettingsData settingsData)

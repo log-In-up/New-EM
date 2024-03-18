@@ -4,9 +4,11 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
     {
         public override DialogWindowID ID => DialogWindowID.CreateSave;
 
-        protected override void OnChangeInputField(string value)
+        protected override async void OnChangeInputField(string value)
         {
-            if (_saveLoadService.SlotExist(value))
+            _save.interactable = false;
+
+            if (await _saveLoadService.SlotExist(value))
             {
                 _save.interactable = false;
             }
@@ -18,11 +20,11 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
             _inputFieldData = value;
         }
 
-        protected override void OnClickSave()
+        protected override async void OnClickPositive()
         {
-            _saveLoadService.CreateNew(_inputFieldData);
+            await _saveLoadService.CreateNew(_inputFieldData);
 
-            base.OnClickSave();
+            base.OnClickPositive();
         }
     }
 }

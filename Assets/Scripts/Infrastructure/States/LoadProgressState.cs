@@ -4,6 +4,7 @@ using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Assets.Scripts.Infrastructure.States
 {
@@ -28,9 +29,9 @@ namespace Assets.Scripts.Infrastructure.States
             _gameUI = gameUI;
         }
 
-        public void Enter()
+        public async void Enter()
         {
-            LoadProgress();
+            await LoadProgress();
 
             _sceneLoader.LoadScreensaverScene(OnSceneLoad);
         }
@@ -39,11 +40,13 @@ namespace Assets.Scripts.Infrastructure.States
         {
         }
 
-        private void LoadProgress()
+        private async Task LoadProgress()
         {
-            foreach (KeyValuePair<string, GameData> item in _saveLoadService.LoadAllSlots())
+            Dictionary<string, GameData> saveSlots = await _saveLoadService.LoadAllSlots();
+
+            foreach (KeyValuePair<string, GameData> slot in saveSlots)
             {
-                _progressService.ObservableDataSlots.Add(item.Key, item.Value);
+                _progressService.ObservableDataSlots.Add(slot.Key, slot.Value);
             }
         }
 

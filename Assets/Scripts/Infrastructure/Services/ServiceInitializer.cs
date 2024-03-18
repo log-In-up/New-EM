@@ -47,7 +47,7 @@ namespace Assets.Scripts.Infrastructure.Services
 
             _serviceLocator.RegisterService<IPersistentProgressService>(new PersistentProgressService());
 
-            RegisterSaveLoadService();
+            await RegisterSaveLoadServiceAsync();
         }
 
         private async void RegisterSettingsService()
@@ -63,7 +63,7 @@ namespace Assets.Scripts.Infrastructure.Services
             _serviceLocator.RegisterService(settingsService);
         }
 
-        private void RegisterSaveLoadService()
+        private async Task RegisterSaveLoadServiceAsync()
         {
             ISaveLoadService saveLoadService = new SaveLoadService(
                     _serviceLocator.GetService<IGameFactory>(),
@@ -72,7 +72,7 @@ namespace Assets.Scripts.Infrastructure.Services
                     _gameStaticData.SaveFileName,
                     _gameStaticData.EncryptionCodeWord);
 
-            saveLoadService.Initialize();
+            await saveLoadService.Initialize();
 
             _serviceLocator.RegisterService(saveLoadService);
         }

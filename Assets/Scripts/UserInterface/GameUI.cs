@@ -1,6 +1,7 @@
 using Assets.Scripts.Infrastructure.Services;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface.DialogueScreens;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Screen = Assets.Scripts.UserInterface.Screens.Screen;
@@ -20,6 +21,14 @@ namespace Assets.Scripts.UserInterface
         private List<Screen> _screens;
 
         private Stack<ScreenID> _windowIDs;
+
+        public void AddWindowActions(DialogWindowID dialogWindowID, Action onCancel, Action onApply)
+        {
+            int index = _dialogueWindows.FindIndex(window => window.ID == dialogWindowID);
+            DialogueWindow dialogueWindow = _dialogueWindows[index];
+
+            dialogueWindow.AddActions(onCancel, onApply);
+        }
 
         public void ClearScreens()
         {
