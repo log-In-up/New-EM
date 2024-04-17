@@ -40,9 +40,9 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
             _handlesCache.Clear();
         }
 
-        public void Initialize()
+        public async Task Initialize()
         {
-            Addressables.InitializeAsync();
+            await Addressables.InitializeAsync().Task;
         }
 
         public async Task<T> Load<T>(AssetReference assetReference) where T : class

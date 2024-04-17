@@ -1,50 +1,49 @@
 using Assets.Scripts.Data;
-using Assets.Scripts.Infrastructure.AssetManagement;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.Audio;
 
 namespace Assets.Scripts.Infrastructure.Services.Settings
 {
-    public class SettingsService : ISettingsService
+    public class GameSettingsService : ISettingsService
     {
-        private const string MASTER_GROUP = "MasterGroup";
         private const string SETTINGS_FOLDER = "Settings";
-        private readonly IAssetProvider _assetProvider;
-        private readonly AssetReference _audioMixerReference;
+        private readonly IAudioService _audioService;
+        private readonly ICameraService _cameraService;
         private readonly string _dataDirPath, _dataFileName;
-        private AudioMixer _audioMixer;
+        private readonly IGraphicsService _graphicsService;
         private SettingsData _settingsData;
 
-        public SettingsService(IAssetProvider assetProvider,
-            AssetReference audioMixerReference,
-            string dataDirPath,
-            string dataFileName)
+        public GameSettingsService(
+           IAudioService audioService,
+           ICameraService cameraService,
+           IGraphicsService graphicsService,
+           string dataDirPath,
+           string dataFileName)
         {
-            _assetProvider = assetProvider;
-            _audioMixerReference = audioMixerReference;
+            _audioService = audioService;
+            _cameraService = cameraService;
+            _graphicsService = graphicsService;
 
             _dataDirPath = dataDirPath;
             _dataFileName = dataFileName;
         }
 
-        ~SettingsService()
-        {
-            _audioMixer = null;
-            _settingsData = null;
-        }
-
         public SettingsData SettingsData => _settingsData;
+
+        public bool DataAreEqual()
+        {
+            bool audio = _audioService.DataAreEqual();
+            bool camera = _cameraService.DataAreEqual();
+            bool graphics = _graphicsService.DataAreEqual();
+
+            return audio && camera && graphics;
+        }
 
         public async Task Initialize()
         {
-            _audioMixer = await _assetProvider.Load<AudioMixer>(_audioMixerReference);
-
             string settingsDirectory = Path.Combine(_dataDirPath, SETTINGS_FOLDER);
-
             if (!Directory.Exists(settingsDirectory))
             {
                 try
@@ -58,17 +57,30 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             }
             _settingsData = await Load();
 
-            SetSettingsFromDownloadedData();
+            await _audioService.Initialize(_settingsData);
+            await _cameraService.Initialize(_settingsData);
+            await _graphicsService.Initialize(_settingsData);
+        }
+
+        public void Invert()
+        {
+            _audioService.Invert();
+            _cameraService.Invert();
+            _graphicsService.Invert();
         }
 
         public Task Save()
         {
+            _audioService.WriteData();
+            _cameraService.WriteData();
+            _graphicsService.WriteData();
+
             return Task.Run(() =>
             {
                 string fullPath = Path.Combine(_dataDirPath, SETTINGS_FOLDER, _dataFileName);
                 try
                 {
-                    WriteData(fullPath, _settingsData);
+                    WriteDataToFile(fullPath, _settingsData);
                 }
                 catch (Exception exception)
                 {
@@ -77,13 +89,12 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             });
         }
 
-        public void SetMasterVolume(float value)
-        {
-            _audioMixer.SetFloat(MASTER_GROUP, Mathf.Log10(value) * 20);
-        }
-
         private Task<SettingsData> Load()
         {
+            int qualityLevel = QualitySettings.GetQualityLevel();
+            int width = Screen.width;
+            int height = Screen.height;
+
             return Task.Run(() =>
             {
                 string fullPath = Path.Combine(_dataDirPath, SETTINGS_FOLDER, _dataFileName);
@@ -95,9 +106,9 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
                     {
                         string dataToLoad = string.Empty;
 
-                        using (FileStream stream = new FileStream(fullPath, FileMode.Open))
+                        using (FileStream stream = new(fullPath, FileMode.Open))
                         {
-                            using StreamReader reader = new StreamReader(stream);
+                            using StreamReader reader = new(stream);
                             dataToLoad = reader.ReadToEnd();
                         }
 
@@ -110,26 +121,26 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
                 }
                 else
                 {
-                    loadedData = new SettingsData();
+                    loadedData = new SettingsData
+                    {
+                        QualityLevel = qualityLevel,
+                        ScreenWidth = width,
+                        ScreenHeight = height
+                    };
 
-                    WriteData(fullPath, loadedData);
+                    WriteDataToFile(fullPath, loadedData);
                 }
 
                 return loadedData;
             });
         }
 
-        private void SetSettingsFromDownloadedData()
-        {
-            SetMasterVolume(_settingsData.MasterVolume);
-        }
-
-        private void WriteData(string fullPath, SettingsData settingsData)
+        private void WriteDataToFile(string fullPath, SettingsData settingsData)
         {
             string dataToStore = JsonUtility.ToJson(settingsData, true);
 
-            using FileStream stream = new FileStream(fullPath, FileMode.Create);
-            using StreamWriter writer = new StreamWriter(stream);
+            using FileStream stream = new(fullPath, FileMode.Create);
+            using StreamWriter writer = new(stream);
             writer.Write(dataToStore);
         }
     }

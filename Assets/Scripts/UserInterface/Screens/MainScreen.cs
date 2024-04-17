@@ -1,9 +1,7 @@
 using Assets.Scripts.Infrastructure.Services;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
-using Assets.Scripts.Infrastructure.Services.Settings;
 using Assets.Scripts.Infrastructure.States;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,7 +31,6 @@ namespace Assets.Scripts.UserInterface.Screens
         private IPersistentProgressService _persistentProgressService;
         private ISaveLoadService _saveLoadService;
         private IGameStateMachine _stateMachine;
-        private ISettingsService _settingsService;
 #if UNITY_ANDROID || UNITY_IOS
         private IInputService _inputService;
 #endif
@@ -96,7 +93,6 @@ namespace Assets.Scripts.UserInterface.Screens
             _persistentProgressService = serviceLocator.GetService<IPersistentProgressService>();
             _saveLoadService = serviceLocator.GetService<ISaveLoadService>();
             _stateMachine = serviceLocator.GetService<IGameStateMachine>();
-            _settingsService = serviceLocator.GetService<ISettingsService>();
 #if UNITY_ANDROID || UNITY_IOS
             _inputService = serviceLocator.GetService<IInputService>();
 #endif

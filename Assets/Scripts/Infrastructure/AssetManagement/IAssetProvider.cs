@@ -20,7 +20,7 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
         /// <summary>
         /// Initializing the asset provider.
         /// </summary>
-        void Initialize();
+        Task Initialize();
 
         /// <summary>
         /// Loading an asset via <see cref="assetReference"/>.

@@ -37,7 +37,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         {
             return Task.Run(async () =>
             {
-                GameData gameData = new GameData();
+                GameData gameData = new();
 
                 _persistentProgressService.CurrentGameData = gameData;
                 await Save(slotId);
@@ -107,9 +107,9 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                     {
                         string dataToLoad = string.Empty;
 
-                        using (FileStream stream = new FileStream(fullPath, FileMode.Open))
+                        using (FileStream stream = new(fullPath, FileMode.Open))
                         {
-                            using StreamReader reader = new StreamReader(stream);
+                            using StreamReader reader = new(stream);
                             dataToLoad = reader.ReadToEnd();
                         }
 
@@ -131,7 +131,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         {
             return Task.Run(async () =>
             {
-                Dictionary<string, GameData> profileDictionary = new Dictionary<string, GameData>();
+                Dictionary<string, GameData> profileDictionary = new();
 
                 string savesDirectory = Path.Combine(_dataDirPath, SAVES_FOLDER);
                 IEnumerable<DirectoryInfo> directoryInfos = new DirectoryInfo(savesDirectory).EnumerateDirectories();
@@ -194,7 +194,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
                 GameData data = _persistentProgressService.ObservableDataSlots[oldDirectoryName];
 
-                SaveInfo saveInfo = new SaveInfo(DateTime.Now.Ticks, newSlotId);
+                SaveInfo saveInfo = new(DateTime.Now.Ticks, newSlotId);
                 data.SaveInfo = saveInfo;
 
                 if (_persistentProgressService.CurrentGameData != null || _persistentProgressService.CurrentGameData == data)
@@ -223,7 +223,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                    SaveInfo saveInfo = new SaveInfo(DateTime.Now.Ticks, slotId);
+                    SaveInfo saveInfo = new(DateTime.Now.Ticks, slotId);
                     _persistentProgressService.CurrentGameData.SaveInfo = saveInfo;
 
                     string dataToStore = JsonUtility.ToJson(_persistentProgressService.CurrentGameData, true);
@@ -314,8 +314,8 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
         private void WriteDataToFile(string fullPath, string dataToStore)
         {
-            using FileStream stream = new FileStream(fullPath, FileMode.Create);
-            using StreamWriter writer = new StreamWriter(stream);
+            using FileStream stream = new(fullPath, FileMode.Create);
+            using StreamWriter writer = new(stream);
             writer.Write(dataToStore);
         }
     }

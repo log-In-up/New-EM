@@ -20,9 +20,14 @@ MonoBehaviour:
   _encryptionCodeWord: EMEncrypt
   _enemyStaticDataLabel:
     m_LabelString: EnemyStaticData
-  _gameScreensaver: {fileID: 102900000, guid: e4852b5eb82bf9a459be84851d4e755c, type: 3}
-  _initialScene: {fileID: 102900000, guid: 99c9720ab356a0642a771bea13969a05, type: 3}
+  _gameScreensaver: GameScreensaver
+  _initialScene: Initial
   _levelStaticDataLabel:
     m_LabelString: LevelStaticData
   _saveFileName: Save.txt
   _settingsFileName: SettingsData.txt
+  _volumeProfileReference:
+    m_AssetGUID: a6560a915ef98420e9faacc1c7438823
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0

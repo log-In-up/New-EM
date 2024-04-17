@@ -9,9 +9,15 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
     public interface ISettingsService : IService
     {
         /// <summary>
-        /// Settings data
+        /// Settings data.
         /// </summary>
         SettingsData SettingsData { get; }
+
+        /// <summary>
+        /// Compares data with saved data.
+        /// </summary>
+        /// <returns>Are the data equal?</returns>
+        bool DataAreEqual();
 
         /// <summary>
         /// Initializes the settings system.
@@ -20,15 +26,14 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
         Task Initialize();
 
         /// <summary>
+        /// Inverts settings to saved values.
+        /// </summary>
+        void Invert();
+
+        /// <summary>
         /// Saves the settings data.
         /// </summary>
         /// <returns>Async task.</returns>
         Task Save();
-
-        /// <summary>
-        /// Sets the value of the main sound.
-        /// </summary>
-        /// <param name="value">Value to set.</param>
-        void SetMasterVolume(float value);
     }
 }

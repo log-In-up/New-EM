@@ -1,5 +1,3 @@
-using System;
-
 namespace Assets.Scripts.UserInterface.DialogueScreens
 {
     public class ChangeSaveWindow : InputFieldWindow
@@ -14,7 +12,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
 
         protected override void OnChangeInputField(string value)
         {
-            _save.interactable = !string.IsNullOrEmpty(value);
+            _apply.interactable = !string.IsNullOrEmpty(value);
             _inputFieldData = value;
         }
 

@@ -1,6 +1,8 @@
 using Assets.Scripts.Infrastructure.Services;
 using Assets.Scripts.Infrastructure.Services.Input;
 using Assets.Scripts.Infrastructure.Services.Settings;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
+using Assets.Scripts.UserInterface.Elements;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,24 +17,31 @@ namespace Assets.Scripts.UserInterface.Screens
         private Button _close;
 
         [SerializeField]
-        private Slider _soundMain;
+        private VideoTab _videoTab;
 
+        [SerializeField]
+        private SoundsTab _soundTab;
+
+        private IAudioService _audioService;
+        private ICameraService _cameraService;
+        private IGameDialogUI _gameDialogUI;
+        private IGraphicsService _graphicsService;
         private IInputService _inputService;
         private ISettingsService _settingsService;
-
         public override ScreenID ID => ScreenID.Settings;
 
         public override void Activate()
         {
             _applySettings.onClick.AddListener(OnClickApply);
             _close.onClick.AddListener(OnClickClose);
-            _soundMain.onValueChanged.AddListener(OnChangeMainChannel);
+
+            _audioService.OnSettingsChanged += SettingsChanged;
+            _graphicsService.OnSettingsChanged += SettingsChanged;
+            _cameraService.OnSettingsChanged += SettingsChanged;
 
             _inputService.OnClickCancel += OnClickClose;
 
-            GetSettings();
-
-            _applySettings.interactable = false;
+            _applySettings.interactable = !_settingsService.DataAreEqual();
 
             base.Activate();
         }
@@ -41,7 +50,10 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             _applySettings.onClick.RemoveListener(OnClickApply);
             _close.onClick.RemoveListener(OnClickClose);
-            _soundMain.onValueChanged.RemoveListener(OnChangeMainChannel);
+
+            _audioService.OnSettingsChanged -= SettingsChanged;
+            _graphicsService.OnSettingsChanged -= SettingsChanged;
+            _cameraService.OnSettingsChanged -= SettingsChanged;
 
             _inputService.OnClickCancel -= OnClickClose;
 
@@ -54,47 +66,42 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             base.Setup(serviceLocator);
 
+            _audioService = serviceLocator.GetService<IAudioService>();
+            _cameraService = serviceLocator.GetService<ICameraService>();
+            _gameDialogUI = serviceLocator.GetService<IGameDialogUI>();
+            _graphicsService = serviceLocator.GetService<IGraphicsService>();
             _inputService = serviceLocator.GetService<IInputService>();
             _settingsService = serviceLocator.GetService<ISettingsService>();
-        }
 
-        private void CheckApplyInteraction()
-        {
-            if (_applySettings.interactable == false)
-            {
-                _applySettings.interactable = true;
-            }
-        }
-
-        private void GetSettings()
-        {
-            _soundMain.value = _settingsService.SettingsData.MasterVolume;
-        }
-
-        private void OnChangeMainChannel(float value)
-        {
-            CheckApplyInteraction();
-
-            _settingsService.SetMasterVolume(value);
+            _videoTab.Setup(serviceLocator);
+            _soundTab.Setup(serviceLocator);
         }
 
         private void OnClickApply()
         {
             _applySettings.interactable = false;
 
-            SetSettings();
+            _videoTab.SetSettings();
+            _soundTab.SetSettings();
 
             _settingsService.Save();
         }
 
         private void OnClickClose()
         {
-            GameUI.OpenScreen(GameUI.PopScreen());
+            if (_settingsService.DataAreEqual())
+            {
+                GameUI.OpenScreen(GameUI.PopScreen());
+            }
+            else
+            {
+                _gameDialogUI.OpenDialogWindow(DialogWindowID.ApplySettings);
+            }
         }
 
-        private void SetSettings()
+        private void SettingsChanged()
         {
-            _settingsService.SettingsData.MasterVolume = _soundMain.value;
+            _applySettings.interactable = !_settingsService.DataAreEqual();
         }
     }
 }

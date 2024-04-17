@@ -701,7 +701,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cancel: {fileID: 8915390255877236091}
-  _save: {fileID: 2541772569239976289}
+  _apply: {fileID: 2541772569239976289}
 --- !u!1 &8993394800936040790
 GameObject:
   m_ObjectHideFlags: 0

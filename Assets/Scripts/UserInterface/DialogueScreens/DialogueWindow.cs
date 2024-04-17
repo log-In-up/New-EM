@@ -13,7 +13,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
         protected Button _cancel;
 
         [SerializeField]
-        protected Button _save;
+        protected Button _apply;
 
         private IGameDialogUI _gameDialogUI;
         private bool _isOpened = false;
@@ -25,7 +25,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
         public virtual void Activate()
         {
             _cancel.onClick.AddListener(OnClickNegative);
-            _save.onClick.AddListener(OnClickPositive);
+            _apply.onClick.AddListener(OnClickPositive);
 
             _isOpened = true;
             gameObject.SetActive(_isOpened);
@@ -40,7 +40,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
         public virtual void Deactivate()
         {
             _cancel.onClick.RemoveListener(OnClickNegative);
-            _save.onClick.RemoveListener(OnClickPositive);
+            _apply.onClick.RemoveListener(OnClickPositive);
 
             _isOpened = false;
             gameObject.SetActive(_isOpened);

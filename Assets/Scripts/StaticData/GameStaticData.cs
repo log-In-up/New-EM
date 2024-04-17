@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -19,11 +18,11 @@ namespace Assets.Scripts.StaticData
 
         [SerializeField]
         [Tooltip("Scene with a dynamic splash screen.")]
-        private SceneAsset _gameScreensaver;
+        private string _gameScreensaver;
 
         [SerializeField]
         [Tooltip("Scene for initializing the game.")]
-        private SceneAsset _initialScene;
+        private string _initialScene;
 
         [SerializeField]
         private AssetLabelReference _levelStaticDataLabel;
@@ -36,13 +35,17 @@ namespace Assets.Scripts.StaticData
         [Tooltip("Game settings file name (including extension).")]
         private string _settingsFileName = "SettingsData.txt";
 
+        [SerializeField]
+        private AssetReference _volumeProfileReference;
+
         public AssetReference AudioMixerReference => _audioMixerReference;
         public string EncryptionCodeWord => _encryptionCodeWord;
         public AssetLabelReference EnemyStaticDataLabel => _enemyStaticDataLabel;
-        public string GameScreensaver => _gameScreensaver.name;
-        public string InitialScene => _initialScene.name;
+        public string GameScreensaver => _gameScreensaver;
+        public string InitialScene => _initialScene;
         public AssetLabelReference LevelStaticDataLabel => _levelStaticDataLabel;
         public string SaveFileName => _saveFileName;
         public string SettingsFileName => _settingsFileName;
+        public AssetReference VolumeProfileReference => _volumeProfileReference;
     }
 }

@@ -6,15 +6,15 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
 
         protected override async void OnChangeInputField(string value)
         {
-            _save.interactable = false;
+            _apply.interactable = false;
 
             if (await _saveLoadService.SlotExist(value))
             {
-                _save.interactable = false;
+                _apply.interactable = false;
             }
             else
             {
-                _save.interactable = !string.IsNullOrEmpty(value);
+                _apply.interactable = !string.IsNullOrEmpty(value);
             }
 
             _inputFieldData = value;

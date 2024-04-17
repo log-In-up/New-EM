@@ -16,7 +16,7 @@ namespace Assets.Editor
             {
                 try
                 {
-                    DirectoryInfo dir = new DirectoryInfo(fullPath);
+                    DirectoryInfo dir = new(fullPath);
                     dir.Attributes &= ~FileAttributes.ReadOnly;
                     dir.Delete(true);
 

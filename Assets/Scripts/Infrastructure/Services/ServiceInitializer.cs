@@ -37,8 +37,8 @@ namespace Assets.Scripts.Infrastructure.Services
             _serviceLocator.RegisterService<IPauseContinueService>(new PauseContinueService());
             _serviceLocator.RegisterService(_sceneLoader);
 
-            RegisterAssetProvider();
-            RegisterSettingsService();
+            await RegisterAssetProviderAsync();
+            RegisteringSettingsServices();
             await RegisterStaticDataAsync();
 
             _serviceLocator.RegisterService<IGameFactory>(new GameFactory(
@@ -50,17 +50,24 @@ namespace Assets.Scripts.Infrastructure.Services
             await RegisterSaveLoadServiceAsync();
         }
 
-        private async void RegisterSettingsService()
+        private async void RegisteringSettingsServices()
         {
-            ISettingsService settingsService = new SettingsService(
-                _serviceLocator.GetService<IAssetProvider>(),
-                _gameStaticData.AudioMixerReference,
+            ICameraService cameraService = new CameraService();
+            IAssetProvider assetProvider = _serviceLocator.GetService<IAssetProvider>();
+            IAudioService audioService = new AudioService(assetProvider, _gameStaticData.AudioMixerReference);
+            IGraphicsService graphicsService = new GraphicsService(assetProvider, _gameStaticData.VolumeProfileReference);
+
+            ISettingsService gameSettingsService = new GameSettingsService(
+                audioService, cameraService, graphicsService,
                 Application.persistentDataPath,
                 _gameStaticData.SettingsFileName);
 
-            await settingsService.Initialize();
+            await gameSettingsService.Initialize();
 
-            _serviceLocator.RegisterService(settingsService);
+            _serviceLocator.RegisterService(audioService);
+            _serviceLocator.RegisterService(cameraService);
+            _serviceLocator.RegisterService(graphicsService);
+            _serviceLocator.RegisterService(gameSettingsService);
         }
 
         private async Task RegisterSaveLoadServiceAsync()
@@ -77,10 +84,10 @@ namespace Assets.Scripts.Infrastructure.Services
             _serviceLocator.RegisterService(saveLoadService);
         }
 
-        private void RegisterAssetProvider()
+        private async Task RegisterAssetProviderAsync()
         {
             IAssetProvider assetProvider = new AssetProvider();
-            assetProvider.Initialize();
+            await assetProvider.Initialize();
 
             _serviceLocator.RegisterService(assetProvider);
         }

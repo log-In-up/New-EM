@@ -19,7 +19,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
 
             _inputFieldData = "";
             _inputField.text = _inputFieldData;
-            _save.interactable = false;
+            _apply.interactable = false;
 
             base.Activate();
         }

@@ -1,23 +1,22 @@
-using UnityEngine.InputSystem;
 using CallbackContext = UnityEngine.InputSystem.InputAction.CallbackContext;
 
 namespace Assets.Scripts.Infrastructure.Services.Input
 {
     public class InputService : IInputService
     {
-        private DefaultInputActions _inputActions;
+        private InputActionsMap _inputActions;
 
         public InputService()
         {
-            _inputActions = new DefaultInputActions();
+            _inputActions = new InputActionsMap();
             _inputActions.Enable();
 
-            _inputActions.UI.Cancel.performed += OnCancel;
+            _inputActions.UserInterface.Cancel.performed += OnCancel;
         }
 
         ~InputService()
         {
-            _inputActions.UI.Cancel.performed -= OnCancel;
+            _inputActions.UserInterface.Cancel.performed -= OnCancel;
 
             _inputActions.Disable();
             _inputActions = null;
