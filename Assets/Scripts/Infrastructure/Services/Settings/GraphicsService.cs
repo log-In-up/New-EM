@@ -46,6 +46,8 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
 
         public void ApplyResolutionData()
         {
+            if (SystemInfo.deviceType != DeviceType.Desktop) return;
+
             if (ResolutionDataAreEqual()) return;
 
             _settingsData.ScreenWidth = _screenWidth;
@@ -53,11 +55,6 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             _settingsData.Fullscreen = _fullscreen;
 
             Screen.SetResolution(_screenWidth, _screenHeight, _fullscreen);
-        }
-
-        private bool ResolutionDataAreEqual()
-        {
-            return _settingsData.ScreenWidth == _screenWidth && _settingsData.ScreenHeight == _screenHeight && _settingsData.Fullscreen == _fullscreen;
         }
 
         public bool DataAreEqual()
@@ -105,7 +102,7 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
         {
             _settingsData = settingsData;
 
-            _volumeProfile = await _assetProvider.Load<VolumeProfile>(_volumeProfileReference);
+            _volumeProfile = await _assetProvider.LoadWithoutCleaning<VolumeProfile>(_volumeProfileReference);
 
             RetrievingComponentsFromVolumeProfile();
             SetData();
@@ -227,6 +224,11 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             };
         }
 
+        private bool ResolutionDataAreEqual()
+        {
+            return _settingsData.ScreenWidth == _screenWidth && _settingsData.ScreenHeight == _screenHeight && _settingsData.Fullscreen == _fullscreen;
+        }
+
         private C Retrieve<C>() where C : VolumeComponent
         {
             return _volumeProfile.TryGet(out C component) ? component : throw new NullReferenceException(nameof(component));
@@ -246,12 +248,12 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             _qualityLevel = _settingsData.QualityLevel;
             QualitySettings.SetQualityLevel(_qualityLevel, true);
 
+            _screenWidth = _settingsData.ScreenWidth;
+            _screenHeight = _settingsData.ScreenHeight;
+            _fullscreen = _settingsData.Fullscreen;
+
             if (SystemInfo.deviceType == DeviceType.Desktop)
             {
-                _screenWidth = _settingsData.ScreenWidth;
-                _screenHeight = _settingsData.ScreenHeight;
-                _fullscreen = _settingsData.Fullscreen;
-
                 Screen.SetResolution(_screenWidth, _screenHeight, _fullscreen);
             }
 

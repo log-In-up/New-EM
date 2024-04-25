@@ -1,4 +1,4 @@
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface.DialogueScreens;
 using System;
@@ -21,6 +21,21 @@ namespace Assets.Scripts.UserInterface
         private List<Screen> _screens;
 
         private Stack<ScreenID> _windowIDs;
+
+        public bool IsActive
+        {
+            get
+            {
+                foreach (DialogueWindow dialogueWindow in _dialogueWindows)
+                {
+                    if (dialogueWindow.IsOpen)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
 
         public void AddWindowActions(DialogWindowID dialogWindowID, Action onCancel, Action onApply)
         {
@@ -47,7 +62,7 @@ namespace Assets.Scripts.UserInterface
             _dialogBackground.gameObject.SetActive(false);
         }
 
-        public void InitializeScreens(ServiceLocator serviceLocator)
+        public void InitializeScreens(IServiceLocator serviceLocator)
         {
             foreach (Screen screen in _screens)
             {
@@ -57,7 +72,7 @@ namespace Assets.Scripts.UserInterface
             }
         }
 
-        public void InitializeWindows(ServiceLocator serviceLocator)
+        public void InitializeWindows(IServiceLocator serviceLocator)
         {
             _dialogBackground.gameObject.SetActive(false);
 

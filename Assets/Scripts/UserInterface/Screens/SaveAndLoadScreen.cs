@@ -1,8 +1,8 @@
 using Assets.Scripts.Data;
-using Assets.Scripts.Infrastructure.Services;
 using Assets.Scripts.Infrastructure.Services.Input;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.UserInterface.Elements;
@@ -99,7 +99,7 @@ namespace Assets.Scripts.UserInterface.Screens
             ClearSaveSlots();
         }
 
-        public override void Setup(ServiceLocator serviceLocator)
+        public override void Setup(IServiceLocator serviceLocator)
         {
             _saveSlots = new List<ISaveSlot>();
 
@@ -149,6 +149,8 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void OnClickClose()
         {
+            if (_gameDialogUI.IsActive) return;
+
             GameUI.OpenScreen(GameUI.PopScreen());
         }
 

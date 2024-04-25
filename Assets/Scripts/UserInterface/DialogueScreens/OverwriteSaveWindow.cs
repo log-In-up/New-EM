@@ -1,4 +1,4 @@
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 
 namespace Assets.Scripts.UserInterface.DialogueScreens
@@ -14,7 +14,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
             _saveToOverwrite = payload.ToString();
         }
 
-        public override void Setup(ServiceLocator serviceLocator)
+        public override void Setup(IServiceLocator serviceLocator)
         {
             base.Setup(serviceLocator);
 

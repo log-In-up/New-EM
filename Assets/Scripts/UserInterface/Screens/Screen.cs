@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Infrastructure.Services;
+﻿using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using UnityEngine;
 
@@ -31,7 +31,7 @@ namespace Assets.Scripts.UserInterface.Screens
             _isOpened = gameObject.activeInHierarchy;
         }
 
-        public virtual void Setup(ServiceLocator serviceLocator)
+        public virtual void Setup(IServiceLocator serviceLocator)
         { }
 
         public virtual void SendPayload<TPayload>(TPayload payload) where TPayload : class

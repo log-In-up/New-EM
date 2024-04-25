@@ -1,4 +1,4 @@
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using System;
 using UnityEngine;
@@ -50,7 +50,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
         {
         }
 
-        public virtual void Setup(ServiceLocator serviceLocator)
+        public virtual void Setup(IServiceLocator serviceLocator)
         {
             _gameDialogUI = serviceLocator.GetService<IGameDialogUI>();
         }

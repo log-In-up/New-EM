@@ -26,6 +26,8 @@ namespace Assets.Scripts.Infrastructure
 
         private void OnApplicationQuit()
         {
+            _game.Stopping();
+
             _game = null;
         }
     }

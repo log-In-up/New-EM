@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.UserInterface;
+﻿using Assets.Scripts.Infrastructure.Services.ServicesLocator;
+using Assets.Scripts.UserInterface;
 using System;
 
 namespace Assets.Scripts.Infrastructure.Services.UserInterface
@@ -17,7 +18,7 @@ namespace Assets.Scripts.Infrastructure.Services.UserInterface
         /// Prepares dialog windows for use.
         /// </summary>
         /// <param name="serviceLocator">In-game services locator.</param>
-        void InitializeWindows(ServiceLocator serviceLocator);
+        void InitializeWindows(IServiceLocator serviceLocator);
 
         /// <summary>
         /// Opens dialog window - <see cref="dialogWindowID"/>.
@@ -40,5 +41,10 @@ namespace Assets.Scripts.Infrastructure.Services.UserInterface
         /// <param name="onCancel">Action of the dialog box on the Cancel event.</param>
         /// <param name="onApply">Action of the dialog box on the Apply event.</param>
         void AddWindowActions(DialogWindowID dialogWindowID, Action onCancel, Action onApply);
+
+        /// <summary>
+        /// Is there currently an active window?
+        /// </summary>
+        bool IsActive { get; }
     }
 }

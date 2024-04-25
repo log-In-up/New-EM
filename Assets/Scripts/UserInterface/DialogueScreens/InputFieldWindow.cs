@@ -1,4 +1,4 @@
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using TMPro;
 using UnityEngine;
@@ -31,7 +31,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
             base.Deactivate();
         }
 
-        public override void Setup(ServiceLocator serviceLocator)
+        public override void Setup(IServiceLocator serviceLocator)
         {
             base.Setup(serviceLocator);
 

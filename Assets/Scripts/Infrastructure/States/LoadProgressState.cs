@@ -13,20 +13,20 @@ namespace Assets.Scripts.Infrastructure.States
         private readonly IGameUI _gameUI;
         private readonly IPersistentProgressService _progressService;
         private readonly ISaveLoadService _saveLoadService;
-        private readonly SceneLoader _sceneLoader;
-        private readonly GameStateMachine _stateMachine;
+        private readonly ISceneLoader _sceneLoader;
+        private readonly IGameStateMachine _stateMachine;
 
-        public LoadProgressState(GameStateMachine stateMachine,
-            SceneLoader sceneLoader,
+        public LoadProgressState(IGameStateMachine stateMachine,
+            IGameUI gameUI,
             IPersistentProgressService progressService,
             ISaveLoadService saveLoadService,
-            IGameUI gameUI)
+            ISceneLoader sceneLoader)
         {
             _stateMachine = stateMachine;
-            _sceneLoader = sceneLoader;
+            _gameUI = gameUI;
             _progressService = progressService;
             _saveLoadService = saveLoadService;
-            _gameUI = gameUI;
+            _sceneLoader = sceneLoader;
         }
 
         public async void Enter()

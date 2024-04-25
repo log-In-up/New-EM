@@ -52,7 +52,7 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
         {
             _settingsData = settingsData;
 
-            _audioMixer = await _assetProvider.Load<AudioMixer>(_audioMixerReference);
+            _audioMixer = await _assetProvider.LoadWithoutCleaning<AudioMixer>(_audioMixerReference);
 
             SetFloat(MASTER_GROUP, _settingsData.MasterVolume);
         }

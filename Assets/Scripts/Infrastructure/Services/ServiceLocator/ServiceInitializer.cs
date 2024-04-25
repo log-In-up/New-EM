@@ -5,22 +5,26 @@ using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.Services.Settings;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.StaticData;
+using Custom;
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
 
-namespace Assets.Scripts.Infrastructure.Services
+namespace Assets.Scripts.Infrastructure.Services.ServicesLocator
 {
     public class ServiceInitializer
     {
-        private readonly GameStateMachine _stateMachine;
-        private readonly ServiceLocator _serviceLocator;
         private readonly GameStaticData _gameStaticData;
         private readonly ISceneLoader _sceneLoader;
+        private readonly IServiceLocator _serviceLocator;
+        private readonly IGameStateMachine _stateMachine;
 
-        public ServiceInitializer(GameStateMachine stateMachine,
-            ServiceLocator serviceLocator,
+        public ServiceInitializer(IGameStateMachine stateMachine,
+            IServiceLocator serviceLocator,
             GameStaticData gameStaticData,
             ISceneLoader sceneLoader)
         {
@@ -32,7 +36,7 @@ namespace Assets.Scripts.Infrastructure.Services
 
         public async Task RegisterServicesAsync()
         {
-            _serviceLocator.RegisterService<IGameStateMachine>(_stateMachine);
+            _serviceLocator.RegisterService(_stateMachine);
             _serviceLocator.RegisterService<IInputService>(new InputService());
             _serviceLocator.RegisterService<IPauseContinueService>(new PauseContinueService());
             _serviceLocator.RegisterService(_sceneLoader);
@@ -48,6 +52,33 @@ namespace Assets.Scripts.Infrastructure.Services
             _serviceLocator.RegisterService<IPersistentProgressService>(new PersistentProgressService());
 
             await RegisterSaveLoadServiceAsync();
+        }
+
+        public void ClearRegisters()
+        {
+            _serviceLocator.UnregisterService<ISaveLoadService>();
+            _serviceLocator.UnregisterService<IPersistentProgressService>();
+            _serviceLocator.UnregisterService<IGameFactory>();
+            _serviceLocator.UnregisterService<IStaticDataService>();
+            _serviceLocator.UnregisterService<ISettingsService>();
+            _serviceLocator.UnregisterService<IGraphicsService>();
+            _serviceLocator.UnregisterService<IAudioService>();
+            _serviceLocator.UnregisterService<ICameraService>();
+            _serviceLocator.UnregisterService<IAssetProvider>();
+            _serviceLocator.UnregisterService<ISceneLoader>();
+            _serviceLocator.UnregisterService<IPauseContinueService>();
+            _serviceLocator.UnregisterService<IInputService>();
+            _serviceLocator.UnregisterService<IGameStateMachine>();
+            _serviceLocator.UnregisterService<IGameDialogUI>();
+            _serviceLocator.UnregisterService<IGameUI>();
+        }
+
+        private async Task RegisterAssetProviderAsync()
+        {
+            IAssetProvider assetProvider = new AssetProvider();
+            await assetProvider.Initialize();
+
+            _serviceLocator.RegisterService(assetProvider);
         }
 
         private async void RegisteringSettingsServices()
@@ -84,22 +115,14 @@ namespace Assets.Scripts.Infrastructure.Services
             _serviceLocator.RegisterService(saveLoadService);
         }
 
-        private async Task RegisterAssetProviderAsync()
-        {
-            IAssetProvider assetProvider = new AssetProvider();
-            await assetProvider.Initialize();
-
-            _serviceLocator.RegisterService(assetProvider);
-        }
-
         private async Task RegisterStaticDataAsync()
         {
             IStaticDataService staticDataService = new StaticDataService(
                 _serviceLocator.GetService<IAssetProvider>(),
                 _gameStaticData);
+            await staticDataService.LoadDataAsync();
 
             _serviceLocator.RegisterService(staticDataService);
-            await staticDataService.LoadDataAsync();
         }
     }
 }

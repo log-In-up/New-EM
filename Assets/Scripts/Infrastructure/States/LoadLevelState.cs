@@ -13,23 +13,23 @@ namespace Assets.Scripts.Infrastructure.States
         private readonly IGameFactory _gameFactory;
         private readonly IGameUI _gameUI;
         private readonly IPersistentProgressService _progressService;
-        private readonly SceneLoader _sceneLoader;
-        private readonly GameStateMachine _stateMachine;
+        private readonly ISceneLoader _sceneLoader;
+        private readonly IGameStateMachine _stateMachine;
         private readonly IStaticDataService _staticDataService;
 
-        public LoadLevelState(GameStateMachine stateMachine,
-            SceneLoader sceneLoader,
+        public LoadLevelState(IGameStateMachine stateMachine,
             IGameFactory gameFactory,
+            IGameUI gameUI,
             IPersistentProgressService progressService,
-            IStaticDataService staticDataService,
-            IGameUI gameUI)
+            ISceneLoader sceneLoader,
+            IStaticDataService staticDataService)
         {
             _stateMachine = stateMachine;
-            _sceneLoader = sceneLoader;
             _gameFactory = gameFactory;
-            _progressService = progressService;
-            _staticDataService = staticDataService;
             _gameUI = gameUI;
+            _progressService = progressService;
+            _sceneLoader = sceneLoader;
+            _staticDataService = staticDataService;
         }
 
         public void Enter(string payload)

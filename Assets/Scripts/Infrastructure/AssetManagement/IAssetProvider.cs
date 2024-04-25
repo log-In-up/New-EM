@@ -23,7 +23,7 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
         Task Initialize();
 
         /// <summary>
-        /// Loading an asset via <see cref="assetReference"/>.
+        /// Loading an asset via <paramref name = "assetReference"/>.
         /// </summary>
         /// <typeparam name="T">Type of asset to load.</typeparam>
         /// <param name="assetReference">Link to the asset in Addressables.</param>
@@ -31,7 +31,7 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
         Task<T> Load<T>(AssetReference assetReference) where T : class;
 
         /// <summary>
-        /// Loading an asset via <see cref="resourceLocation"/>.
+        /// Loading an asset via <paramref name = "resourceLocation"/>.
         /// </summary>
         /// <typeparam name="T">Type of asset to load.</typeparam>
         /// <param name="resourceLocation">Link to the asset in Addressables.</param>
@@ -39,7 +39,7 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
         Task<T> Load<T>(IResourceLocation resourceLocation) where T : class;
 
         /// <summary>
-        /// Loading an asset via <see cref="address"/>.
+        /// Loading an asset via <paramref name="address"/>.
         /// </summary>
         /// <typeparam name="T">Type of asset to load.</typeparam>
         /// <param name="address">Link to the asset.</param>
@@ -47,11 +47,19 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
         Task<T> Load<T>(string address) where T : class;
 
         /// <summary>
-        /// Creates a list of resource locations using label and type.
+        /// Creates a list of resource locations using <paramref name = "label"/> and <paramref name = "type"/>.
         /// </summary>
         /// <param name="label">Label of assets.</param>
         /// <param name="type">Type of assets.</param>
         /// <returns>List of resource locations.</returns>
         Task<IList<IResourceLocation>> LoadByLabel(string label, Type type);
+
+        /// <summary>
+        /// Loading an asset via <paramref name="assetReference"/> which ignores manual <see cref="CleanUp"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of asset to load.</typeparam>
+        /// <param name="assetReference">Link to the asset in Addressables.</param>
+        /// <returns></returns>
+        Task<T> LoadWithoutCleaning<T>(AssetReference assetReference) where T : class;
     }
 }

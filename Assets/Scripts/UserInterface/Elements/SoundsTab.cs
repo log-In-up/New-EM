@@ -1,4 +1,4 @@
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.Settings;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,7 +13,7 @@ namespace Assets.Scripts.UserInterface.Elements
         private ISettingsService _settingsService;
         private IAudioService _audioService;
 
-        public override void Setup(ServiceLocator serviceLocator)
+        public override void Setup(IServiceLocator serviceLocator)
         {
             base.Setup(serviceLocator);
 

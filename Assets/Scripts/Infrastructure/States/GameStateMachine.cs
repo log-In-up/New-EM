@@ -1,5 +1,5 @@
 ﻿using Assets.Scripts.Infrastructure.Factory;
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
@@ -12,12 +12,12 @@ namespace Assets.Scripts.Infrastructure.States
 {
     public class GameStateMachine : IGameStateMachine
     {
-        private readonly SceneLoader _sceneLoader;
-        private readonly ServiceLocator _serviceLocator;
+        private readonly ISceneLoader _sceneLoader;
+        private readonly IServiceLocator _serviceLocator;
         private IExitableState _activeState;
         private Dictionary<Type, IExitableState> _states;
 
-        public GameStateMachine(SceneLoader sceneLoader, ServiceLocator serviceLocator)
+        public GameStateMachine(ISceneLoader sceneLoader, IServiceLocator serviceLocator)
         {
             _sceneLoader = sceneLoader;
             _serviceLocator = serviceLocator;
@@ -47,22 +47,22 @@ namespace Assets.Scripts.Infrastructure.States
 
         public void InitializeStateMashine()
         {
+            IPersistentProgressService progressService = _serviceLocator.GetService<IPersistentProgressService>();
+            IGameUI gameUI = _serviceLocator.GetService<IGameUI>();
+
             _states = new Dictionary<Type, IExitableState>()
             {
                 [typeof(GameLoopState)] = new GameLoopState(this,
-                    _serviceLocator.GetService<IGameUI>(),
+                    gameUI,
                     _serviceLocator.GetService<IPauseContinueService>()),
                 [typeof(LoadLevelState)] = new LoadLevelState(this,
-                    _sceneLoader,
                     _serviceLocator.GetService<IGameFactory>(),
-                    _serviceLocator.GetService<IPersistentProgressService>(),
-                    _serviceLocator.GetService<IStaticDataService>(),
-                    _serviceLocator.GetService<IGameUI>()),
+                    gameUI, progressService, _sceneLoader,
+                    _serviceLocator.GetService<IStaticDataService>()),
                 [typeof(LoadProgressState)] = new LoadProgressState(this,
-                    _sceneLoader,
-                    _serviceLocator.GetService<IPersistentProgressService>(),
+                    gameUI, progressService,
                     _serviceLocator.GetService<ISaveLoadService>(),
-                    _serviceLocator.GetService<IGameUI>()),
+                    _sceneLoader),
                 [typeof(PreGameLoopState)] = new PreGameLoopState(this)
             };
         }

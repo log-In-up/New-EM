@@ -10,14 +10,14 @@ namespace Assets.Scripts.Infrastructure
     public interface ISceneLoader : IService
     {
         /// <summary>
-        /// Loads the scene named <see cref="sceneName"/>.
+        /// Loads the scene named <paramref name = "sceneName"/>.
         /// </summary>
         /// <param name="sceneName">The name of the scene stored in Scenes In Build.</param>
         /// <param name="onLoaded">Action performed after the scene is loaded.</param>
         void Load(string sceneName, Action onLoaded = null);
 
         /// <summary>
-        /// Loads the scene named <see cref="sceneName"/>.
+        /// Loads the scene named <paramref name = "sceneName"/>.
         /// </summary>
         /// <param name="sceneName">The name of the scene stored in Scenes In Build.</param>
         /// <param name="onLoaded">Action performed after the scene is loaded.</param>

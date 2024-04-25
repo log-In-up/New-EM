@@ -15,6 +15,8 @@ namespace Assets.Scripts.Data
             DepthOfField = true;
 #if UNITY_EDITOR
             Fullscreen = false;
+#elif UNITY_ANDROID
+            Fullscreen = false;
 #else
             Fullscreen = true;
 #endif

@@ -6,11 +6,11 @@ namespace Assets.Scripts.Infrastructure.States
 {
     public class GameLoopState : IState
     {
-        private readonly GameStateMachine _stateMachine;
         private readonly IGameUI _gameUI;
         private readonly IPauseContinueService _pauseContinueService;
+        private readonly IGameStateMachine _stateMachine;
 
-        public GameLoopState(GameStateMachine stateMachine,
+        public GameLoopState(IGameStateMachine stateMachine,
             IGameUI gameUI,
             IPauseContinueService pauseContinueService)
         {

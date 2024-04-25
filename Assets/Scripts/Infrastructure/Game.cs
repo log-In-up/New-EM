@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Infrastructure.Services;
+﻿using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.StaticData;
@@ -11,10 +11,10 @@ namespace Assets.Scripts.Infrastructure
     {
         private readonly GameStaticData _gameStaticData;
         private readonly GameUI _hud;
-        private SceneLoader _sceneLoader;
+        private ISceneLoader _sceneLoader;
         private ServiceInitializer _serviceInitializer;
-        private ServiceLocator _serviceLocator;
-        private GameStateMachine _stateMachine;
+        private IServiceLocator _serviceLocator;
+        private IGameStateMachine _stateMachine;
 
         public Game(ICoroutineRunner coroutineRunner, GameUI hud, GameStaticData gameStaticData)
         {
@@ -47,6 +47,11 @@ namespace Assets.Scripts.Infrastructure
             hud.InitializeWindows(_serviceLocator);
 
             _sceneLoader.Load(_gameStaticData.InitialScene, EnterLoadLevel);
+        }
+
+        public void Stopping()
+        {
+            _serviceInitializer.ClearRegisters();
         }
 
         private GameUI CreateAndRegisterHUD()

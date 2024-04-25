@@ -1,3 +1,4 @@
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.UserInterface;
 
 namespace Assets.Scripts.Infrastructure.Services.UserInterface
@@ -16,7 +17,7 @@ namespace Assets.Scripts.Infrastructure.Services.UserInterface
         /// Prepares user interface screens for use.
         /// </summary>
         /// <param name="serviceLocator">In-game services locator.</param>
-        void InitializeScreens(ServiceLocator serviceLocator);
+        void InitializeScreens(IServiceLocator serviceLocator);
 
         /// <summary>
         /// Opens the user interface screen - <see cref="screenID"/>.

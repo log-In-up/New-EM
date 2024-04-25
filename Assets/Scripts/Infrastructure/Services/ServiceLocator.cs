@@ -1,4 +1,8 @@
-﻿namespace Assets.Scripts.Infrastructure.Services
+﻿//namespace Assets.Scripts.Infrastructure.Services
+//{
+using Assets.Scripts.Infrastructure.Services;
+
+namespace Custom
 {
     /// <summary>
     /// In-game services locator.

@@ -1,4 +1,4 @@
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.PersistentProgress;
 using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.States;
@@ -86,7 +86,7 @@ namespace Assets.Scripts.UserInterface.Screens
             _start.gameObject.SetActive(true);
         }
 
-        public override void Setup(ServiceLocator serviceLocator)
+        public override void Setup(IServiceLocator serviceLocator)
         {
             base.Setup(serviceLocator);
 

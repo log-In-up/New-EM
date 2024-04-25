@@ -45,7 +45,7 @@ namespace Assets.Scripts.Infrastructure.Factory
         Task<GameObject> CreatePlayer(Vector3 position, Quaternion rotation);
 
         /// <summary>
-        /// Creating an enemy spanner.
+        /// Creating an enemy spawner.
         /// </summary>
         /// <param name="spawnData">Data for spawn.</param>
         /// <returns>Async task.</returns>

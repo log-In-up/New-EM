@@ -1,4 +1,4 @@
-using Assets.Scripts.Infrastructure.Services;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.Input;
 using Assets.Scripts.Infrastructure.Services.Settings;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
@@ -62,7 +62,7 @@ namespace Assets.Scripts.UserInterface.Screens
             _applySettings.interactable = false;
         }
 
-        public override void Setup(ServiceLocator serviceLocator)
+        public override void Setup(IServiceLocator serviceLocator)
         {
             base.Setup(serviceLocator);
 
@@ -89,6 +89,8 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void OnClickClose()
         {
+            if (_gameDialogUI.IsActive) return;
+
             if (_settingsService.DataAreEqual())
             {
                 GameUI.OpenScreen(GameUI.PopScreen());

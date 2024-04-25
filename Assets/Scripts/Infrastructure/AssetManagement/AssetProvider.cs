@@ -9,11 +9,13 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
 {
     public class AssetProvider : IAssetProvider
     {
+        private Dictionary<string, AsyncOperationHandle> _cleanIgnoreOperationsCache;
         private Dictionary<string, AsyncOperationHandle> _completedOperationsCache;
         private Dictionary<string, List<AsyncOperationHandle>> _handlesCache;
 
         public AssetProvider()
         {
+            _cleanIgnoreOperationsCache = new Dictionary<string, AsyncOperationHandle>();
             _completedOperationsCache = new Dictionary<string, AsyncOperationHandle>();
             _handlesCache = new Dictionary<string, List<AsyncOperationHandle>>();
         }
@@ -21,7 +23,9 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
         ~AssetProvider()
         {
             CleanUp();
+            CleanUpIgnoredCashe();
 
+            _cleanIgnoreOperationsCache = null;
             _completedOperationsCache = null;
             _handlesCache = null;
         }
@@ -74,6 +78,19 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
             return await Addressables.LoadResourceLocationsAsync(label, type).Task;
         }
 
+        public async Task<T> LoadWithoutCleaning<T>(AssetReference assetReference) where T : class
+        {
+            if (_cleanIgnoreOperationsCache.TryGetValue(assetReference.AssetGUID, out AsyncOperationHandle operationHandle))
+                return operationHandle.Result as T;
+
+            AsyncOperationHandle asyncOperation = Addressables.LoadAssetAsync<T>(assetReference);
+            await asyncOperation.Task;
+
+            _cleanIgnoreOperationsCache.Add(assetReference.AssetGUID, asyncOperation);
+
+            return asyncOperation.Result as T;
+        }
+
         private void AddHandle<T>(AsyncOperationHandle<T> asyncOperationHandle, string key) where T : class
         {
             if (!_handlesCache.TryGetValue(key, out List<AsyncOperationHandle> handles))
@@ -82,6 +99,14 @@ namespace Assets.Scripts.Infrastructure.AssetManagement
                 _handlesCache[key] = handles;
             }
             handles.Add(asyncOperationHandle);
+        }
+
+        private void CleanUpIgnoredCashe()
+        {
+            foreach (KeyValuePair<string, AsyncOperationHandle> item in _cleanIgnoreOperationsCache)
+            {
+                Addressables.Release(item.Value);
+            }
         }
 
         private async Task<T> RunWithCasheOnComplete<T>(AsyncOperationHandle<T> asyncOperationHandle, string casheKey) where T : class
