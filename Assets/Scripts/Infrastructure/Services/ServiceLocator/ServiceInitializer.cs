@@ -8,11 +8,8 @@ using Assets.Scripts.Infrastructure.Services.Settings;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.StaticData;
-using Custom;
-using System;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.InputSystem.HID;
 
 namespace Assets.Scripts.Infrastructure.Services.ServicesLocator
 {
