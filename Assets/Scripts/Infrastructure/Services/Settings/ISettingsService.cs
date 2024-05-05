@@ -9,9 +9,11 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
     public interface ISettingsService : IService
     {
         /// <summary>
-        /// Settings data.
+        /// Search for the game parameters file.
         /// </summary>
-        SettingsData SettingsData { get; }
+        /// <typeparam name="DataType">The file type we are trying to get.</typeparam>
+        /// <returns>Game settings file for editing.</returns>
+        DataType GetData<DataType>() where DataType : SettingsData;
 
         /// <summary>
         /// Compares data with saved data.
@@ -22,8 +24,9 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
         /// <summary>
         /// Initializes the settings system.
         /// </summary>
+        /// <typeparam name="DataType">The file type with which the system is initialized.</typeparam>
         /// <returns>Async task.</returns>
-        Task Initialize();
+        Task Initialize<DataType>() where DataType : SettingsData;
 
         /// <summary>
         /// Inverts settings to saved values.

@@ -29,7 +29,7 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             return true;
         }
 
-        public Task Initialize(SettingsData settingsData)
+        public Task Initialize<SettingsType>(SettingsType settingsData) where SettingsType : SettingsData
         {
             _settingsData = settingsData;
 

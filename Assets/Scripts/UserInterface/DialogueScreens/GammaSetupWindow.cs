@@ -1,3 +1,4 @@
+using Assets.Scripts.Data;
 using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.Settings;
 using UnityEngine;
@@ -10,9 +11,17 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
         [SerializeField]
         private Slider _gammaSlider;
 
+        private float _gammaInitial;
         private IGraphicsService _graphicsService;
         private ISettingsService _settingsService;
-        private float _gammaInitial;
+
+#if UNITY_ANDROID || UNITY_IOS
+        protected HandheldSettingsData _settingsData;
+#elif UNITY_PS3 || UNITY_PS4 || UNITY_SAMSUNGTV || UNITY_XBOX360 || UNITY_XBOXONE
+        protected ConsoleSettingsData _settingsData;
+#elif UNITY_STANDALONE
+        protected DesktopSettingsData _settingsData;
+#endif
 
         public override DialogWindowID ID => DialogWindowID.GammaSetup;
 
@@ -20,7 +29,7 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
         {
             _gammaSlider.onValueChanged.AddListener(OnChangeGamma);
 
-            _gammaInitial = _settingsService.SettingsData.Gamma;
+            _gammaInitial = _settingsData.Gamma;
             _gammaSlider.value = _gammaInitial;
 
             base.Activate();
@@ -40,12 +49,15 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
             _graphicsService = serviceLocator.GetService<IGraphicsService>();
             _settingsService = serviceLocator.GetService<ISettingsService>();
 
-            _gammaSlider.value = _settingsService.SettingsData.Gamma;
-        }
+#if UNITY_ANDROID || UNITY_IOS
+            _settingsData = _settingsService.GetData<HandheldSettingsData>();
+#elif UNITY_PS3 || UNITY_PS4 || UNITY_SAMSUNGTV || UNITY_XBOX360 || UNITY_XBOXONE
+            _settingsData = _settingsService.GetData<ConsoleSettingsData>();
+#elif UNITY_STANDALONE
+            _settingsData = _settingsService.GetData<DesktopSettingsData>();
+#endif
 
-        private void OnChangeGamma(float value)
-        {
-            _graphicsService.SetGamma(value);
+            _gammaSlider.value = _settingsData.Gamma;
         }
 
         protected override void OnClickNegative()
@@ -53,6 +65,11 @@ namespace Assets.Scripts.UserInterface.DialogueScreens
             base.OnClickNegative();
 
             _graphicsService.SetGamma(_gammaInitial);
+        }
+
+        private void OnChangeGamma(float value)
+        {
+            _graphicsService.SetGamma(value);
         }
     }
 }

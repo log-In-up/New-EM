@@ -6,12 +6,10 @@ namespace Assets.Scripts.Infrastructure.Services.ServicesLocator
 {
     public class ServiceLocator : IServiceLocator
     {
-        private static ServiceLocator _instance;
         private ConcurrentDictionary<Type, object> _services = new();
 
         public ServiceLocator()
         {
-            _instance = this;
             _services = new ConcurrentDictionary<Type, object>();
         }
 
@@ -20,8 +18,6 @@ namespace Assets.Scripts.Infrastructure.Services.ServicesLocator
             _services.Clear();
             _services = null;
         }
-
-        public static IServiceLocator Container => _instance ??= new ServiceLocator();
 
         public T GetService<T>() where T : IService
         {

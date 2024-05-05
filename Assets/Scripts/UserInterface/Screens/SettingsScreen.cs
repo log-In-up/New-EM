@@ -1,5 +1,5 @@
-using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.Input;
+using Assets.Scripts.Infrastructure.Services.ServicesLocator;
 using Assets.Scripts.Infrastructure.Services.Settings;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface.Elements;

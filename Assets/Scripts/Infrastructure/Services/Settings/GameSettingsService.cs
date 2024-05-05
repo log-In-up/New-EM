@@ -6,14 +6,14 @@ using UnityEngine;
 
 namespace Assets.Scripts.Infrastructure.Services.Settings
 {
-    public class GameSettingsService : ISettingsService
+    public abstract class GameSettingsService<T> : ISettingsService where T : SettingsData
     {
-        private const string SETTINGS_FOLDER = "Settings";
+        protected const string SETTINGS_FOLDER = "Settings";
+        protected readonly string _dataDirPath, _dataFileName;
         private readonly IAudioService _audioService;
         private readonly ICameraService _cameraService;
-        private readonly string _dataDirPath, _dataFileName;
         private readonly IGraphicsService _graphicsService;
-        private SettingsData _settingsData;
+        private T _settingsData;
 
         public GameSettingsService(
            IAudioService audioService,
@@ -30,8 +30,6 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             _dataFileName = dataFileName;
         }
 
-        public SettingsData SettingsData => _settingsData;
-
         public bool DataAreEqual()
         {
             bool audio = _audioService.DataAreEqual();
@@ -41,7 +39,12 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             return audio && camera && graphics;
         }
 
-        public async Task Initialize()
+        public DataType GetData<DataType>() where DataType : SettingsData
+        {
+            return _settingsData.GetType().Equals(typeof(DataType)) ? _settingsData as DataType : null;
+        }
+
+        public async Task Initialize<DataType>() where DataType : SettingsData
         {
             string settingsDirectory = Path.Combine(_dataDirPath, SETTINGS_FOLDER);
             if (!Directory.Exists(settingsDirectory))
@@ -89,16 +92,14 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             });
         }
 
-        private Task<SettingsData> Load()
+        protected virtual Task<T> Load()
         {
             int qualityLevel = QualitySettings.GetQualityLevel();
-            int width = Screen.width;
-            int height = Screen.height;
 
             return Task.Run(() =>
             {
                 string fullPath = Path.Combine(_dataDirPath, SETTINGS_FOLDER, _dataFileName);
-                SettingsData loadedData = null;
+                T loadedData = null;
 
                 if (File.Exists(fullPath))
                 {
@@ -112,7 +113,7 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
                             dataToLoad = reader.ReadToEnd();
                         }
 
-                        loadedData = JsonUtility.FromJson<SettingsData>(dataToLoad);
+                        loadedData = JsonUtility.FromJson<T>(dataToLoad);
                     }
                     catch (Exception exception)
                     {
@@ -121,12 +122,9 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
                 }
                 else
                 {
-                    loadedData = new SettingsData
-                    {
-                        QualityLevel = qualityLevel,
-                        ScreenWidth = width,
-                        ScreenHeight = height
-                    };
+                    loadedData = (T)Activator.CreateInstance(typeof(T));
+
+                    loadedData.QualityLevel = qualityLevel;
 
                     WriteDataToFile(fullPath, loadedData);
                 }
@@ -135,7 +133,7 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             });
         }
 
-        private void WriteDataToFile(string fullPath, SettingsData settingsData)
+        protected void WriteDataToFile(string fullPath, T settingsData)
         {
             string dataToStore = JsonUtility.ToJson(settingsData, true);
 

@@ -10,14 +10,12 @@ namespace Assets.Scripts.UserInterface.Elements
         [SerializeField]
         private Slider _soundMain;
 
-        private ISettingsService _settingsService;
         private IAudioService _audioService;
 
         public override void Setup(IServiceLocator serviceLocator)
         {
             base.Setup(serviceLocator);
 
-            _settingsService = serviceLocator.GetService<ISettingsService>();
             _audioService = serviceLocator.GetService<IAudioService>();
 
             GetSettings();
@@ -25,7 +23,7 @@ namespace Assets.Scripts.UserInterface.Elements
 
         private void GetSettings()
         {
-            _soundMain.value = _settingsService.SettingsData.MasterVolume;
+            _soundMain.value = _settingsData.MasterVolume;
         }
 
         public override void SetSettings()

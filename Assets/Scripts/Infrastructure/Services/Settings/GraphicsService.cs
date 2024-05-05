@@ -1,5 +1,6 @@
 using Assets.Scripts.Data;
 using Assets.Scripts.Infrastructure.AssetManagement;
+using Assets.Scripts.Utility;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -9,20 +10,18 @@ using UnityEngine.Rendering.Universal;
 
 namespace Assets.Scripts.Infrastructure.Services.Settings
 {
-    public class GraphicsService : IGraphicsService
+    public abstract class GraphicsService<T> : IGraphicsService where T : SettingsData
     {
+        protected Bloom _bloom;
+        protected DepthOfField _depthOfField;
+        protected LiftGammaGain _liftGammaGain;
+        protected MotionBlur _motionBlur;
+        protected T _settingsData;
+        protected Vignette _vignette;
+        protected VolumeProfile _volumeProfile;
         private readonly IAssetProvider _assetProvider;
         private readonly AssetReference _volumeProfileReference;
-        private Bloom _bloom;
-        private DepthOfField _depthOfField;
-        private bool _fullscreen;
-        private LiftGammaGain _liftGammaGain;
-        private MotionBlur _motionBlur;
         private int _qualityLevel;
-        private int _screenWidth, _screenHeight;
-        private SettingsData _settingsData;
-        private Vignette _vignette;
-        private VolumeProfile _volumeProfile;
 
         public GraphicsService(IAssetProvider assetProvider,
             AssetReference volumeProfileReference)
@@ -44,17 +43,8 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
 
         public event IProcessSettings.SettingsChanged OnSettingsChanged;
 
-        public void ApplyResolutionData()
+        public virtual void ApplyResolutionData()
         {
-            if (SystemInfo.deviceType != DeviceType.Desktop) return;
-
-            if (ResolutionDataAreEqual()) return;
-
-            _settingsData.ScreenWidth = _screenWidth;
-            _settingsData.ScreenHeight = _screenHeight;
-            _settingsData.Fullscreen = _fullscreen;
-
-            Screen.SetResolution(_screenWidth, _screenHeight, _fullscreen);
         }
 
         public bool DataAreEqual()
@@ -85,7 +75,7 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
 
             foreach ((float, float) item in GetFloatDataList())
             {
-                if (item.Item1 == item.Item2)
+                if (item.Item1.ApproximatelyEqual(item.Item2, 0.001f))
                 {
                     continue;
                 }
@@ -98,9 +88,9 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             return true;
         }
 
-        public async Task Initialize(SettingsData settingsData)
+        public async Task Initialize<SettingsType>(SettingsType settingsData) where SettingsType : SettingsData
         {
-            _settingsData = settingsData;
+            _settingsData = settingsData as T;
 
             _volumeProfile = await _assetProvider.LoadWithoutCleaning<VolumeProfile>(_volumeProfileReference);
 
@@ -158,12 +148,12 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             OnSettingsChanged?.Invoke();
         }
 
-        public void SetResolutionData(int width, int height, bool fullscreen)
+        public virtual void SetResolutionData(int width, int height, bool fullscreen)
         {
-            _screenWidth = width;
-            _screenHeight = height;
-            _fullscreen = fullscreen;
+        }
 
+        protected void CallOnChangeSettingsEvent()
+        {
             OnSettingsChanged?.Invoke();
         }
 
@@ -192,13 +182,40 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             _settingsData.TargetFrameRate = Application.targetFrameRate;
         }
 
-        private (bool, bool)[] GetBoolDataList()
+        protected virtual (int, int)[] GetIntDataList()
+        {
+            return new (int, int)[]
+            {
+                ((int)_motionBlur.quality.value , _settingsData.MotionBlurQuality),
+                (QualitySettings.GetQualityLevel() , _settingsData.QualityLevel),
+                (Application.targetFrameRate, _settingsData.TargetFrameRate)
+            };
+        }
+
+        protected virtual void SetData()
+        {
+            _qualityLevel = _settingsData.QualityLevel;
+            QualitySettings.SetQualityLevel(_qualityLevel, true);
+
+            _bloom.active = _settingsData.Bloom;
+
+            _depthOfField.active = _settingsData.DepthOfField;
+
+            _motionBlur.active = _settingsData.MotionBlur;
+            _motionBlur.quality.value = (MotionBlurQuality)_settingsData.MotionBlurQuality;
+
+            _vignette.active = _settingsData.Vignette;
+
+            _liftGammaGain.gamma.Override(new Vector4(1.0f, 1.0f, 1.0f, _settingsData.Gamma));
+            Application.targetFrameRate = _settingsData.TargetFrameRate;
+        }
+
+        protected virtual (bool, bool)[] GetBoolDataList()
         {
             return new (bool, bool)[]
             {
                 (_bloom.active ,_settingsData.Bloom),
                 (_depthOfField.active , _settingsData.DepthOfField),
-                (_fullscreen ,_settingsData.Fullscreen),
                 (_motionBlur.active ,_settingsData.MotionBlur),
                 (_vignette.active , _settingsData.Vignette)
             };
@@ -210,23 +227,6 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             {
                 (_liftGammaGain.gamma.value.w , _settingsData.Gamma)
             };
-        }
-
-        private (int, int)[] GetIntDataList()
-        {
-            return new (int, int)[]
-            {
-                ((int)_motionBlur.quality.value , _settingsData.MotionBlurQuality),
-                (QualitySettings.GetQualityLevel() , _settingsData.QualityLevel),
-                (_screenWidth , _settingsData.ScreenWidth),
-                (_screenHeight , _settingsData.ScreenHeight),
-                (Application.targetFrameRate, _settingsData.TargetFrameRate)
-            };
-        }
-
-        private bool ResolutionDataAreEqual()
-        {
-            return _settingsData.ScreenWidth == _screenWidth && _settingsData.ScreenHeight == _screenHeight && _settingsData.Fullscreen == _fullscreen;
         }
 
         private C Retrieve<C>() where C : VolumeComponent
@@ -241,33 +241,6 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             _motionBlur = Retrieve<MotionBlur>();
             _vignette = Retrieve<Vignette>();
             _liftGammaGain = Retrieve<LiftGammaGain>();
-        }
-
-        private void SetData()
-        {
-            _qualityLevel = _settingsData.QualityLevel;
-            QualitySettings.SetQualityLevel(_qualityLevel, true);
-
-            _screenWidth = _settingsData.ScreenWidth;
-            _screenHeight = _settingsData.ScreenHeight;
-            _fullscreen = _settingsData.Fullscreen;
-
-            if (SystemInfo.deviceType == DeviceType.Desktop)
-            {
-                Screen.SetResolution(_screenWidth, _screenHeight, _fullscreen);
-            }
-
-            _bloom.active = _settingsData.Bloom;
-
-            _depthOfField.active = _settingsData.DepthOfField;
-
-            _motionBlur.active = _settingsData.MotionBlur;
-            _motionBlur.quality.value = (MotionBlurQuality)_settingsData.MotionBlurQuality;
-
-            _vignette.active = _settingsData.Vignette;
-
-            _liftGammaGain.gamma.Override(new Vector4(1.0f, 1.0f, 1.0f, _settingsData.Gamma));
-            Application.targetFrameRate = _settingsData.TargetFrameRate;
         }
     }
 }

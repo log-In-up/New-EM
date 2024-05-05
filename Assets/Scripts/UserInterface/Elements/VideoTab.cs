@@ -28,12 +28,12 @@ namespace Assets.Scripts.UserInterface.Elements
         [SerializeField]
         private GameObject _resolutionParent, _motionBlurDropdownParent;
 
+        private const int FPS_LIMIT_DISABLED = -1;
         private ICameraService _cameraService;
         private int _currentResolutionIndex, _motionBlurQualityIndex;
         private IGameDialogUI _gameDialogUI;
         private IGraphicsService _graphicsService;
         private Resolution[] _resolutions;
-        private ISettingsService _settingsService;
 
         public override void SetSettings()
         {
@@ -50,7 +50,6 @@ namespace Assets.Scripts.UserInterface.Elements
             _cameraService = serviceLocator.GetService<ICameraService>();
             _gameDialogUI = serviceLocator.GetService<IGameDialogUI>();
             _graphicsService = serviceLocator.GetService<IGraphicsService>();
-            _settingsService = serviceLocator.GetService<ISettingsService>();
 
             SettingParametersFromService();
         }
@@ -156,7 +155,7 @@ namespace Assets.Scripts.UserInterface.Elements
         {
             if (value.ApproximatelyEqual(_fpsLimiter.minValue, 0.001f))
             {
-                _graphicsService.SetMaxFPS(-1);
+                _graphicsService.SetMaxFPS(FPS_LIMIT_DISABLED);
             }
             else
             {
@@ -168,36 +167,34 @@ namespace Assets.Scripts.UserInterface.Elements
         {
             SetupQualityDropdown();
 
-            if (SystemInfo.deviceType == DeviceType.Desktop)
-            {
-                SetupResolutionDropdown();
+#if UNITY_STANDALONE
+            SetupResolutionDropdown();
+            _fullscreen.isOn = _settingsData.Fullscreen;
+#endif
 
-                _fullscreen.isOn = _settingsService.SettingsData.Fullscreen;
-            }
-
-            _bloom.isOn = _settingsService.SettingsData.Bloom;
-            _depthOfField.isOn = _settingsService.SettingsData.DepthOfField;
+            _bloom.isOn = _settingsData.Bloom;
+            _depthOfField.isOn = _settingsData.DepthOfField;
             SetupMotionBlur();
-            _vignette.isOn = _settingsService.SettingsData.Vignette;
+            _vignette.isOn = _settingsData.Vignette;
 
             SetupFrameRate();
         }
 
         private void SetupFrameRate()
         {
-            if (_settingsService.SettingsData.TargetFrameRate <= ((int)_fpsLimiter.minValue))
+            if (_settingsData.TargetFrameRate <= ((int)_fpsLimiter.minValue))
             {
                 _fpsLimiter.value = _fpsLimiter.minValue;
             }
             else
             {
-                _fpsLimiter.value = _settingsService.SettingsData.TargetFrameRate;
+                _fpsLimiter.value = _settingsData.TargetFrameRate;
             }
         }
 
         private void SetupMotionBlur()
         {
-            _motionBlur.isOn = _settingsService.SettingsData.MotionBlur;
+            _motionBlur.isOn = _settingsData.MotionBlur;
 
             _motionBlurDropdownParent.SetActive(_motionBlur.isOn);
 
@@ -210,7 +207,7 @@ namespace Assets.Scripts.UserInterface.Elements
             _motionBlurQuality.ClearOptions();
             _motionBlurQuality.AddOptions(qualityNames);
 
-            _motionBlurQuality.SetValueWithoutNotify(_settingsService.SettingsData.MotionBlurQuality);
+            _motionBlurQuality.SetValueWithoutNotify(_settingsData.MotionBlurQuality);
         }
 
         private void SetupQualityDropdown()
@@ -227,6 +224,8 @@ namespace Assets.Scripts.UserInterface.Elements
             int input = QualitySettings.GetQualityLevel();
             _quality.SetValueWithoutNotify(input);
         }
+
+#if UNITY_STANDALONE
 
         private void SetupResolutionDropdown()
         {
@@ -248,5 +247,7 @@ namespace Assets.Scripts.UserInterface.Elements
 
             _resolution.SetValueWithoutNotify(_currentResolutionIndex);
         }
+
+#endif
     }
 }

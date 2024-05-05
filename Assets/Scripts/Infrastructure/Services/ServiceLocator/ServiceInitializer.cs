@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Infrastructure.AssetManagement;
+﻿using Assets.Scripts.Data;
+using Assets.Scripts.Infrastructure.AssetManagement;
 using Assets.Scripts.Infrastructure.Factory;
 using Assets.Scripts.Infrastructure.Services.Input;
 using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
@@ -8,6 +9,7 @@ using Assets.Scripts.Infrastructure.Services.Settings;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.Infrastructure.States;
 using Assets.Scripts.StaticData;
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -83,14 +85,50 @@ namespace Assets.Scripts.Infrastructure.Services.ServicesLocator
             ICameraService cameraService = new CameraService();
             IAssetProvider assetProvider = _serviceLocator.GetService<IAssetProvider>();
             IAudioService audioService = new AudioService(assetProvider, _gameStaticData.AudioMixerReference);
-            IGraphicsService graphicsService = new GraphicsService(assetProvider, _gameStaticData.VolumeProfileReference);
 
-            ISettingsService gameSettingsService = new GameSettingsService(
-                audioService, cameraService, graphicsService,
-                Application.persistentDataPath,
-                _gameStaticData.SettingsFileName);
+            IGraphicsService graphicsService;
+            ISettingsService gameSettingsService;
 
-            await gameSettingsService.Initialize();
+            switch (SystemInfo.deviceType)
+            {
+                case DeviceType.Handheld:
+                    graphicsService = new HandheldGraphics(assetProvider, _gameStaticData.VolumeProfileReference);
+
+                    gameSettingsService = new HandheldSettingsService(
+                        audioService, cameraService, graphicsService,
+                        Application.persistentDataPath,
+                        _gameStaticData.SettingsFileName);
+
+                    await gameSettingsService.Initialize<HandheldSettingsData>();
+                    break;
+
+                case DeviceType.Desktop:
+                    graphicsService = new DesktopGraphics(assetProvider, _gameStaticData.VolumeProfileReference);
+
+                    gameSettingsService = new DesktopSettingsService(
+                        audioService, cameraService, graphicsService,
+                        Application.persistentDataPath,
+                        _gameStaticData.SettingsFileName);
+
+                    await gameSettingsService.Initialize<DesktopSettingsData>();
+                    break;
+
+                case DeviceType.Console:
+                    graphicsService = new ConsoleGraphics(assetProvider, _gameStaticData.VolumeProfileReference);
+
+                    gameSettingsService = new ConsoleSettingsService(
+                        audioService, cameraService, graphicsService,
+                        Application.persistentDataPath,
+                        _gameStaticData.SettingsFileName);
+
+                    await gameSettingsService.Initialize<ConsoleSettingsData>();
+                    break;
+
+                case DeviceType.Unknown:
+                    throw new NotSupportedException("Device type is unknown.");
+                default:
+                    throw new NotImplementedException("The default case should not be called.");
+            }
 
             _serviceLocator.RegisterService(audioService);
             _serviceLocator.RegisterService(cameraService);

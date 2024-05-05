@@ -5,21 +5,14 @@ namespace Assets.Scripts.Data
     [Serializable]
     public class SettingsData
     {
-        public bool Bloom, DepthOfField, Fullscreen, MotionBlur, Vignette;
+        public bool Bloom, DepthOfField, MotionBlur, Vignette;
         public float FieldOfView, Gamma, MasterVolume;
-        public int MotionBlurQuality, QualityLevel, ScreenHeight, ScreenWidth, TargetFrameRate;
+        public int MotionBlurQuality, QualityLevel, TargetFrameRate;
 
         public SettingsData()
         {
             Bloom = true;
             DepthOfField = true;
-#if UNITY_EDITOR
-            Fullscreen = false;
-#elif UNITY_ANDROID
-            Fullscreen = false;
-#else
-            Fullscreen = true;
-#endif
             MotionBlur = true;
             Vignette = true;
             FieldOfView = 60.0f;

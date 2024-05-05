@@ -48,7 +48,7 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             return true;
         }
 
-        public async Task Initialize(SettingsData settingsData)
+        public async Task Initialize<SettingsType>(SettingsType settingsData) where SettingsType : SettingsData
         {
             _settingsData = settingsData;
 
@@ -86,18 +86,18 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
             }
         }
 
-        private void SetFloat(string name, float value)
-        {
-            float volume = Mathf.Log10(value) * 20;
-            _audioMixer.SetFloat(name, volume);
-        }
-
         private (float, float)[] GetFloatDataList()
         {
             return new (float, float)[]
             {
                 (GetFloat(MASTER_GROUP) , _settingsData.MasterVolume)
             };
+        }
+
+        private void SetFloat(string name, float value)
+        {
+            float volume = Mathf.Log10(value) * 20;
+            _audioMixer.SetFloat(name, volume);
         }
     }
 }

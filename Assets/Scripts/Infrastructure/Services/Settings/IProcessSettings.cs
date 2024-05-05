@@ -27,9 +27,10 @@ namespace Assets.Scripts.Infrastructure.Services.Settings
         /// <summary>
         /// Initializing the settings service.
         /// </summary>
+        /// <typeparam name="SettingsType">Settings file type.</typeparam>
         /// <param name="settingsData">Settings data.</param>
         /// <returns>Async task.</returns>
-        Task Initialize(SettingsData settingsData);
+        Task Initialize<SettingsType>(SettingsType settingsData) where SettingsType : SettingsData;
 
         /// <summary>
         /// Inverts settings to saved values.
