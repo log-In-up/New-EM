@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Infrastructure.Services.PauseAndContinue;
 using Assets.Scripts.Infrastructure.Services.UserInterface;
 using Assets.Scripts.UserInterface;
+using UnityEngine;
 
 namespace Assets.Scripts.Infrastructure.States
 {
@@ -21,15 +22,28 @@ namespace Assets.Scripts.Infrastructure.States
 
         public void Enter()
         {
-            _gameUI.OpenScreen(ScreenID.Gameplay);
+            Application.focusChanged += OnChangeFocus;
 
-            if (_pauseContinueService.IsPaused)
-            {
-                _pauseContinueService.Continue();
-            }
+            _gameUI.OpenScreen(ScreenID.Gameplay);
+            UnpauseGame();
         }
 
         public void Exit()
+        {
+            Application.focusChanged -= OnChangeFocus;
+
+            UnpauseGame();
+        }
+
+        private void OnChangeFocus(bool value)
+        {
+            if (_pauseContinueService.IsPaused) return;
+
+            _pauseContinueService.Pause();
+            _gameUI.OpenScreen(ScreenID.GamePauseScreen);
+        }
+
+        private void UnpauseGame()
         {
             if (_pauseContinueService.IsPaused)
             {

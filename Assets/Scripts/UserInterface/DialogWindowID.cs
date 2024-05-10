@@ -6,6 +6,7 @@
         ChangeSave = 1,
         CreateSave = 2,
         GammaSetup = 3,
-        OverwriteSave = 4
+        OverwriteSave = 4,
+        GameQuit = 5
     }
 }

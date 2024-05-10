@@ -4,6 +4,7 @@ using Assets.Scripts.Infrastructure.Services.SaveLoad;
 using Assets.Scripts.Infrastructure.States;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Scripts.Infrastructure.Services.UserInterface;
 
 #if UNITY_ANDROID || UNITY_IOS
 using Assets.Scripts.Infrastructure.Services.Input;
@@ -28,6 +29,7 @@ namespace Assets.Scripts.UserInterface.Screens
         [SerializeField]
         private Button _start;
 
+        private IGameDialogUI _gameDialogUI;
         private IPersistentProgressService _persistentProgressService;
         private ISaveLoadService _saveLoadService;
         private IGameStateMachine _stateMachine;
@@ -90,6 +92,7 @@ namespace Assets.Scripts.UserInterface.Screens
         {
             base.Setup(serviceLocator);
 
+            _gameDialogUI = serviceLocator.GetService<IGameDialogUI>();
             _persistentProgressService = serviceLocator.GetService<IPersistentProgressService>();
             _saveLoadService = serviceLocator.GetService<ISaveLoadService>();
             _stateMachine = serviceLocator.GetService<IGameStateMachine>();
@@ -112,11 +115,7 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void OnClickQuit()
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
+            _gameDialogUI.OpenDialogWindow(DialogWindowID.GameQuit);
         }
 
         private void OnClickSettings()
