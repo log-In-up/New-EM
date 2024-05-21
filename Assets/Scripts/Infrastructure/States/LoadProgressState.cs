@@ -42,9 +42,9 @@ namespace Assets.Scripts.Infrastructure.States
 
         private async Task LoadProgress()
         {
-            Dictionary<string, GameData> saveSlots = await _saveLoadService.LoadAllSlots();
+            Dictionary<string, SaveInfo> saveSlots = await _saveLoadService.LoadAllSlots();
 
-            foreach (KeyValuePair<string, GameData> slot in saveSlots)
+            foreach (KeyValuePair<string, SaveInfo> slot in saveSlots)
             {
                 _progressService.ObservableDataSlots.Add(slot.Key, slot.Value);
             }

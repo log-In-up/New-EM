@@ -43,7 +43,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 await Save(slotId);
 
                 string fullPath = Path.Combine(_dataDirPath, SAVES_FOLDER, slotId, _dataFileName);
-                _persistentProgressService.ObservableDataSlots.Add(fullPath, gameData);
+                _persistentProgressService.ObservableDataSlots.Add(fullPath, gameData.SaveInfo);
             });
         }
 
@@ -127,11 +127,11 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             });
         }
 
-        public Task<Dictionary<string, GameData>> LoadAllSlots()
+        public Task<Dictionary<string, SaveInfo>> LoadAllSlots()
         {
             return Task.Run(async () =>
             {
-                Dictionary<string, GameData> profileDictionary = new();
+                Dictionary<string, SaveInfo> profileDictionary = new();
 
                 string savesDirectory = Path.Combine(_dataDirPath, SAVES_FOLDER);
                 IEnumerable<DirectoryInfo> directoryInfos = new DirectoryInfo(savesDirectory).EnumerateDirectories();
@@ -151,7 +151,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
                     if (data != null)
                     {
-                        profileDictionary.Add(fullPath, data);
+                        profileDictionary.Add(fullPath, data.SaveInfo);
                     }
                     else
                     {
@@ -175,7 +175,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
 
         public Task Rename(string oldSlotId, string newSlotId)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 string oldDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, oldSlotId);
                 string newDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, newSlotId);
@@ -192,7 +192,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 oldDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, oldSlotId, _dataFileName);
                 newDirectoryName = Path.Combine(_dataDirPath, SAVES_FOLDER, newSlotId, _dataFileName);
 
-                GameData data = _persistentProgressService.ObservableDataSlots[oldDirectoryName];
+                GameData data = await Load(oldSlotId);
 
                 SaveInfo saveInfo = new(DateTime.Now.Ticks, newSlotId);
                 data.SaveInfo = saveInfo;
@@ -208,7 +208,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                 WriteDataToFile(newDirectoryName, dataToStore);
 
                 _persistentProgressService.ObservableDataSlots.Remove(oldDirectoryName);
-                _persistentProgressService.ObservableDataSlots.Add(newDirectoryName, data);
+                _persistentProgressService.ObservableDataSlots.Add(newDirectoryName, saveInfo);
             });
         }
 
@@ -275,12 +275,12 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
             {
                 string mostRecentSlotId = string.Empty;
 
-                Dictionary<string, GameData> profilesGameData = await LoadAllSlots();
+                Dictionary<string, SaveInfo> profilesGameData = await LoadAllSlots();
 
-                foreach (KeyValuePair<string, GameData> pair in profilesGameData)
+                foreach (KeyValuePair<string, SaveInfo> pair in profilesGameData)
                 {
                     string slotId = Path.GetFileName(Path.GetDirectoryName(pair.Key));
-                    GameData gameData = pair.Value;
+                    GameData gameData = await Load(slotId);
 
                     if (gameData == null) continue;
 
@@ -290,7 +290,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
                     }
                     else
                     {
-                        long dateData = profilesGameData[mostRecentSlotId].SaveInfo.LastUpdated;
+                        long dateData = gameData.SaveInfo.LastUpdated;
                         DateTime mostRecentDateTime = DateTime.FromBinary(dateData);
                         DateTime newDateTime = DateTime.FromBinary(gameData.SaveInfo.LastUpdated);
 

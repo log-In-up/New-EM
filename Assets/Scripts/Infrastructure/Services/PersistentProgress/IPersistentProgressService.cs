@@ -16,6 +16,6 @@ namespace Assets.Scripts.Infrastructure.Services.PersistentProgress
         /// <summary>
         /// All game data files.
         /// </summary>
-        ObservableDictionary<string, GameData> ObservableDataSlots { get; set; }
+        ObservableDictionary<string, SaveInfo> ObservableDataSlots { get; set; }
     }
 }

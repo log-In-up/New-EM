@@ -42,7 +42,7 @@ namespace Assets.Scripts.Infrastructure.Services.SaveLoad
         /// </summary>
         /// <returns>All saved slots with links to them.</returns>
         /// <returns>Async task.</returns>
-        Task<Dictionary<string, GameData>> LoadAllSlots();
+        Task<Dictionary<string, SaveInfo>> LoadAllSlots();
 
         /// <summary>
         /// Loads the last saved slot.

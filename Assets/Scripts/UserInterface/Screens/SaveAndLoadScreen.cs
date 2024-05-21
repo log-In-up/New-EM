@@ -112,6 +112,7 @@ namespace Assets.Scripts.UserInterface.Screens
             _gameDialogUI = serviceLocator.GetService<IGameDialogUI>();
 
             _gameDialogUI.AddWindowActions(DialogWindowID.ChangeSave, SaveCollectionChanged, SaveCollectionChanged);
+            _gameDialogUI.AddWindowActions(DialogWindowID.CreateSave, SaveCollectionChanged, SaveCollectionChanged);
             _gameDialogUI.AddWindowActions(DialogWindowID.OverwriteSave, SaveCollectionChanged, SaveCollectionChanged);
         }
 
@@ -128,10 +129,10 @@ namespace Assets.Scripts.UserInterface.Screens
 
         private void CreateSaveSlots()
         {
-            foreach (KeyValuePair<string, GameData> item in _persistentProgressService.ObservableDataSlots)
+            foreach (KeyValuePair<string, SaveInfo> item in _persistentProgressService.ObservableDataSlots)
             {
                 ISaveSlot saveSlot = Instantiate(_saveSlotExample, _viewportParent);
-                saveSlot.SetSlotData(item.Value.SaveInfo);
+                saveSlot.SetSlotData(item.Value);
 
                 _saveSlots.Add(saveSlot);
             }

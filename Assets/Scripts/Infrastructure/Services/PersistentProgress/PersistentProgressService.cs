@@ -7,11 +7,11 @@ namespace Assets.Scripts.Infrastructure.Services.PersistentProgress
     {
         public GameData CurrentGameData { get; set; }
 
-        public ObservableDictionary<string, GameData> ObservableDataSlots { get; set; }
+        public ObservableDictionary<string, SaveInfo> ObservableDataSlots { get; set; }
 
         public PersistentProgressService()
         {
-            ObservableDataSlots = new ObservableDictionary<string, GameData>();
+            ObservableDataSlots = new ObservableDictionary<string, SaveInfo>();
         }
     }
 }
